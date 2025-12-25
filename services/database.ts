@@ -94,12 +94,10 @@ export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 
 // Проверка и создание недостающих таблиц
 const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
-  // Проверяем наличие таблицы reports
+  // Создаём таблицу reports (IF NOT EXISTS предотвратит ошибку если таблица уже существует)
   try {
-    await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='reports';");
-  } catch {
     await db.execAsync(`
-      CREATE TABLE reports (
+      CREATE TABLE IF NOT EXISTS reports (
         id TEXT PRIMARY KEY,
         inspectionId TEXT NOT NULL,
         createdBy TEXT NOT NULL,
@@ -113,39 +111,46 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
         FOREIGN KEY (customerId) REFERENCES users(id)
       );
     `);
+  } catch (error) {
+    console.warn('Ошибка при создании таблицы reports:', error);
   }
 
   // Проверяем наличие поля purpose в account_requests
+  // Используем PRAGMA table_info для безопасной проверки поля
   try {
-    await db.getFirstAsync("SELECT purpose FROM account_requests LIMIT 1;");
-  } catch {
-    try {
-      await db.execAsync("ALTER TABLE account_requests ADD COLUMN purpose TEXT;");
-    } catch (e) {
-      // Поле уже существует или таблица не существует - игнорируем
+    // Проверяем через PRAGMA, который не требует наличия данных в таблице
+    const columns = await db.getAllAsync<{ name: string }>("PRAGMA table_info(account_requests);");
+    const hasPurposeColumn = columns.some(col => col.name === 'purpose');
+    
+    if (!hasPurposeColumn) {
+      try {
+        await db.execAsync("ALTER TABLE account_requests ADD COLUMN purpose TEXT;");
+      } catch (e) {
+        // Игнорируем ошибку если таблицы нет или поле уже существует
+      }
     }
+  } catch (e) {
+    // Если таблицы account_requests не существует, игнорируем
   }
 
-  // Проверяем наличие таблицы inspection_photos
+  // Создаём таблицу inspection_photos
   try {
-    await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='inspection_photos';");
-  } catch {
     await db.execAsync(`
-      CREATE TABLE inspection_photos (
+      CREATE TABLE IF NOT EXISTS inspection_photos (
         id TEXT PRIMARY KEY,
         inspectionId TEXT NOT NULL,
         photoUri TEXT NOT NULL,
         FOREIGN KEY (inspectionId) REFERENCES inspections(id)
       );
     `);
+  } catch (error) {
+    console.warn('Ошибка при создании таблицы inspection_photos:', error);
   }
 
-  // Проверяем наличие таблицы chat_deleted_for
+  // Создаём таблицу chat_deleted_for
   try {
-    await db.getFirstAsync("SELECT name FROM sqlite_master WHERE type='table' AND name='chat_deleted_for';");
-  } catch {
     await db.execAsync(`
-      CREATE TABLE chat_deleted_for (
+      CREATE TABLE IF NOT EXISTS chat_deleted_for (
         chatId TEXT NOT NULL,
         userId TEXT NOT NULL,
         PRIMARY KEY (chatId, userId),
@@ -153,5 +158,7 @@ const ensureTablesExist = async (db: SQLite.SQLiteDatabase): Promise<void> => {
         FOREIGN KEY (userId) REFERENCES users(id)
       );
     `);
+  } catch (error) {
+    console.warn('Ошибка при создании таблицы chat_deleted_for:', error);
   }
 };
