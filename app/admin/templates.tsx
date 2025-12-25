@@ -4,13 +4,12 @@ import React, { useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -96,71 +95,74 @@ export default function AdminTemplatesScreen() {
         animationType="slide"
         transparent
         onRequestClose={() => setSelectedTemplate(null)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setSelectedTemplate(null)}>
-          <Pressable style={styles.sheetContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.sheetSafeArea}>
-              <ScreenHeader
-                title={selectedTemplate?.title ?? 'Шаблон'}
-                onMenuPress={() => setSelectedTemplate(null)}
-              />
-              <ScrollView
-                style={styles.modalScroll}
-                contentContainerStyle={styles.modalContent}
-                keyboardShouldPersistTaps="handled">
-                {selectedTemplate && (
-                  <>
+        <View style={styles.modalOverlay}>
+          <SafeAreaView style={styles.sheetSafeArea}>
+            <ScreenHeader
+              title={selectedTemplate?.title ?? 'Шаблон'}
+              onMenuPress={() => setSelectedTemplate(null)}
+            />
+            <ScrollView
+              style={{flex: 1}}
+              contentContainerStyle={styles.modalContent}
+              keyboardShouldPersistTaps="handled">
+              {selectedTemplate && (
+                <>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Название</Text>
+                    <Text style={styles.detailValue}>{selectedTemplate.title}</Text>
+                  </View>
+                  {selectedTemplate.description && (
                     <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Название</Text>
-                      <Text style={styles.detailValue}>{selectedTemplate.title}</Text>
+                      <Text style={styles.detailLabel}>Описание</Text>
+                      <Text style={styles.detailValue}>{selectedTemplate.description}</Text>
                     </View>
-                    {selectedTemplate.description && (
-                      <View style={styles.detailSection}>
-                        <Text style={styles.detailLabel}>Описание</Text>
-                        <Text style={styles.detailValue}>{selectedTemplate.description}</Text>
-                      </View>
-                    )}
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Создал</Text>
-                      <Text style={styles.detailValue}>
-                        {data.users.find((u) => u.id === selectedTemplate.createdBy)?.fullName ??
-                          'Неизвестно'}
-                      </Text>
+                  )}
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Создал</Text>
+                    <Text style={styles.detailValue}>
+                      {data.users.find((u) => u.id === selectedTemplate.createdBy)?.fullName ??
+                        'Неизвестно'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Последнее обновление</Text>
+                    <Text style={styles.detailValue}>
+                      {new Date(selectedTemplate.updatedAt).toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Использований в проверках</Text>
+                    <Text style={styles.detailValue}>
+                      {data.inspections.filter((i) => i.templateId === selectedTemplate.id).length}
+                    </Text>
+                  </View>
+                  <Separator />
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>Пункты проверки ({selectedTemplate.items.length})</Text>
+                    <View style={styles.detailItems}>
+                      {selectedTemplate.items.map((item) => (
+                        <View key={item.id} style={styles.detailItem}>
+                          <Text style={styles.detailItemText}>{item.text}</Text>
+                        </View>
+                      ))}
                     </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Последнее обновление</Text>
-                      <Text style={styles.detailValue}>
-                        {new Date(selectedTemplate.updatedAt).toLocaleString()}
-                      </Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Использований в проверках</Text>
-                      <Text style={styles.detailValue}>
-                        {data.inspections.filter((i) => i.templateId === selectedTemplate.id).length}
-                      </Text>
-                    </View>
-                    <Separator />
-                    <View style={styles.detailSection}>
-                      <Text style={styles.sectionTitle}>Пункты проверки ({selectedTemplate.items.length})</Text>
-                      <View style={styles.detailItems}>
-                        {selectedTemplate.items.map((item) => (
-                          <View key={item.id} style={styles.detailItem}>
-                            <Text style={styles.detailItemText}>{item.text}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  </>
-                )}
-              </ScrollView>
-            </SafeAreaView>
-          </Pressable>
-        </Pressable>
+                  </View>
+                </>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  sheetContainer: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'transparent',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#f8fafc',
@@ -205,13 +207,13 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    justifyContent: 'flex-end',
   },
   modalContainer: {
     width: '100%',
     backgroundColor: 'transparent',
   },
   sheetSafeArea: {
+    flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -221,7 +223,6 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: -6 },
     elevation: 14,
-    maxHeight: '90%',
   },
   modalScroll: {
     flex: 1,

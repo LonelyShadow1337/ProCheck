@@ -322,13 +322,14 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    justifyContent: 'flex-end',
   },
   sheetContainer: {
+    flex: 1,
     width: '100%',
     backgroundColor: 'transparent',
   },
   sheetSafeArea: {
+    flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -338,7 +339,6 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: -6 },
     elevation: 14,
-    maxHeight: '90%',
   },
   modalScroll: {
     flex: 1,

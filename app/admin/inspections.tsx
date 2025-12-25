@@ -6,13 +6,12 @@ import {
   Alert,
   FlatList,
   Modal,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -131,101 +130,100 @@ export default function AdminInspectionsScreen() {
       <Modal
         visible={!!selectedInspection}
         animationType="slide"
-        transparent
+        transparent = {true}
         onRequestClose={() => setSelectedInspection(null)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setSelectedInspection(null)}>
-          <Pressable style={styles.sheetContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.sheetSafeArea}>
-              <ScreenHeader
-                title={selectedInspection?.title ?? 'Проверка'}
-                onMenuPress={() => setSelectedInspection(null)}
-              />
-              <ScrollView
-                style={styles.modalScroll}
-                contentContainerStyle={styles.modalContent}
-                keyboardShouldPersistTaps="handled">
-                {selectedInspection && (
-                  <>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Название</Text>
-                      <Text style={styles.detailValue}>{selectedInspection.title}</Text>
+        <View style={styles.modalOverlay}>
+          <SafeAreaView style={styles.sheetSafeArea}>
+            <ScreenHeader 
+              title={selectedInspection?.title ?? 'Проверка'} 
+              onMenuPress={() => setSelectedInspection(null)}
+            />
+            <ScrollView 
+              style={{ flex: 1 }} 
+              contentContainerStyle={styles.modalContent} 
+              keyboardShouldPersistTaps="handled" 
+            >
+              {selectedInspection && (
+                <>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Название</Text>
+                    <Text style={styles.detailValue}>{selectedInspection.title}</Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Тип</Text>
+                    <Text style={styles.detailValue}>{selectedInspection.type}</Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Предприятие</Text>
+                    <Text style={styles.detailValue}>{selectedInspection.enterprise.name}</Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Адрес</Text>
+                    <Text style={styles.detailValue}>{selectedInspection.enterprise.address}</Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Заказчик</Text>
+                    <Text style={styles.detailValue}>
+                      {data.users.find((u) => u.id === selectedInspection.customerId)?.fullName ??
+                        'Неизвестно'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Инспектор</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedInspection.assignedInspectorId
+                        ? data.users.find((u) => u.id === selectedInspection.assignedInspectorId)
+                            ?.fullName ?? 'Неизвестно'
+                        : 'Не назначен'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Плановая дата</Text>
+                    <Text style={styles.detailValue}>
+                      {new Date(selectedInspection.planDate).toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Срок отчёта</Text>
+                    <Text style={styles.detailValue}>
+                      {new Date(selectedInspection.reportDueDate).toLocaleDateString()}
+                    </Text>
+                  </View>
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Статус</Text>
+                    <Text style={[styles.detailValue, { color: getStatusColor(selectedInspection.status) }]}>
+                      {selectedInspection.status}
+                    </Text>
+                  </View>
+                  <Separator />
+                  <View style={styles.detailSection}>
+                    <Text style={styles.sectionTitle}>Пункты проверки ({selectedInspection.checkItems.length})</Text>
+                    <View style={styles.checkItemsList}>
+                      {selectedInspection.checkItems.map((item) => (
+                        <View key={item.id} style={styles.checkItemCard}>
+                          <Text style={styles.checkItemText}>{item.text}</Text>
+                          <Text style={styles.checkItemStatus}>Статус: {item.status}</Text>
+                        </View>
+                      ))}
                     </View>
+                  </View>
+                  {selectedInspection.reportId && (
                     <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Тип</Text>
-                      <Text style={styles.detailValue}>{selectedInspection.type}</Text>
+                      <Text style={styles.detailLabel}>Отчёт</Text>
+                      <TouchableOpacity
+                        style={styles.reportButton}
+                        onPress={() =>
+                          openReport(selectedInspection.reportId!, selectedInspection.title)
+                        }>
+                        <Text style={styles.reportButtonText}>Просмотреть отчёт</Text>
+                      </TouchableOpacity>
                     </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Предприятие</Text>
-                      <Text style={styles.detailValue}>{selectedInspection.enterprise.name}</Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Адрес</Text>
-                      <Text style={styles.detailValue}>{selectedInspection.enterprise.address}</Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Заказчик</Text>
-                      <Text style={styles.detailValue}>
-                        {data.users.find((u) => u.id === selectedInspection.customerId)?.fullName ??
-                          'Неизвестно'}
-                      </Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Инспектор</Text>
-                      <Text style={styles.detailValue}>
-                        {selectedInspection.assignedInspectorId
-                          ? data.users.find((u) => u.id === selectedInspection.assignedInspectorId)
-                              ?.fullName ?? 'Неизвестно'
-                          : 'Не назначен'}
-                      </Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Плановая дата</Text>
-                      <Text style={styles.detailValue}>
-                        {new Date(selectedInspection.planDate).toLocaleString()}
-                      </Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Срок отчёта</Text>
-                      <Text style={styles.detailValue}>
-                        {new Date(selectedInspection.reportDueDate).toLocaleDateString()}
-                      </Text>
-                    </View>
-                    <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Статус</Text>
-                      <Text style={[styles.detailValue, { color: getStatusColor(selectedInspection.status) }]}>
-                        {selectedInspection.status}
-                      </Text>
-                    </View>
-                    <Separator />
-                    <View style={styles.detailSection}>
-                      <Text style={styles.sectionTitle}>Пункты проверки ({selectedInspection.checkItems.length})</Text>
-                      <View style={styles.checkItemsList}>
-                        {selectedInspection.checkItems.map((item) => (
-                          <View key={item.id} style={styles.checkItemCard}>
-                            <Text style={styles.checkItemText}>{item.text}</Text>
-                            <Text style={styles.checkItemStatus}>Статус: {item.status}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                    {selectedInspection.reportId && (
-                      <View style={styles.detailSection}>
-                        <Text style={styles.detailLabel}>Отчёт</Text>
-                        <TouchableOpacity
-                          style={styles.reportButton}
-                          onPress={() =>
-                            openReport(selectedInspection.reportId!, selectedInspection.title)
-                          }>
-                          <Text style={styles.reportButtonText}>Просмотреть отчёт</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </>
-                )}
-              </ScrollView>
-            </SafeAreaView>
-          </Pressable>
-        </Pressable>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -290,30 +288,24 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    justifyContent: 'flex-end',
   },
   sheetContainer: {
+    flex: 1,
     width: '100%',
     backgroundColor: 'transparent',
   },
   sheetSafeArea: {
+    flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -6 },
-    elevation: 14,
-    maxHeight: '90%',
   },
   modalScroll: {
     flex: 1,
-    minHeight: 200,
   },
   modalContent: {
-    padding: 20,
+    padding: 40,
   },
   detailSection: {
     marginBottom: 16,

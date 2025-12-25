@@ -29,8 +29,8 @@ export default function AdminReportsScreen() {
   const [reportContent, setReportContent] = useState<{ text: string; title: string } | null>(null);
 
   const sortedReports = useMemo(() => {
-    return data.reports.sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+   return [...data.reports].sort((a, b) => {
+     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }, [data.reports]);
 
@@ -54,9 +54,13 @@ export default function AdminReportsScreen() {
         return;
       }
       const text = await FileSystem.readAsStringAsync(report.documentPath);
+      if (!text || text.trim().length === 0) {
+        Alert.alert('Пустой отчёт', 'Файл существует, но не содержит данных');
+        return;
+      }
       setReportContent({ text, title: inspection?.title ?? 'Отчёт' });
       setSelectedReport(reportId);
-    } catch {
+    } catch (err) {
       Alert.alert('Ошибка', 'Не удалось открыть документ');
     }
   };
@@ -217,13 +221,14 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    justifyContent: 'flex-end',
   },
   sheetContainer: {
+    flex: 1,
     width: '100%',
     backgroundColor: 'transparent',
   },
   sheetSafeArea: {
+    flex: 1,
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
     paddingTop: 16,
@@ -233,7 +238,6 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: -6 },
     elevation: 14,
-    maxHeight: '90%',
   },
   reportScroll: {
     flex: 1,

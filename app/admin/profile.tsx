@@ -3,18 +3,18 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -321,6 +321,59 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: '#64748b',
+  },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(15, 23, 42, 0.4)', 
+    justifyContent: 'center', // окно по центру 
+    alignItems: 'center', 
+  }, 
+  modalContainer: { 
+    flex: 1,
+    width: '100%', 
+    backgroundColor: '#ffffff', 
+    padding: 20, 
+  }, 
+  modalContent: { 
+    flex: 1, 
+  }, 
+  modalTitle: { 
+   fontSize: 18, 
+    fontWeight: '600', 
+    marginBottom: 16, 
+    color: '#1f2933', 
+    textAlign: 'center', 
+  }, 
+  modalActions: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginTop: 20,
+ }, 
+  modalCancel: { 
+    flex: 1, 
+    marginRight: 8, 
+    paddingVertical: 12, 
+    backgroundColor: '#e5e7eb', 
+    alignItems: 'center', 
+    borderRadius: 6, 
+  }, 
+  modalCancelText: { 
+    color: '#374151', 
+    fontSize: 15, 
+    fontWeight: '500', 
+  }, 
+  modalSave: { 
+    flex: 1, 
+    marginLeft: 8, 
+    paddingVertical: 12, 
+    backgroundColor: '#1d4ed8', 
+    alignItems: 'center', 
+    borderRadius: 6, 
+  }, 
+  modalSaveText: { 
+    color: '#fff', 
+    fontSize: 15, 
+    fontWeight: '600', 
   },
 });
 
