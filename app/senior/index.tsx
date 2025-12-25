@@ -311,7 +311,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -392,7 +391,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: '#fee2e2',
-    borderRadius: 12,
   },
   deleteText: {
     color: '#b91c1c',
@@ -442,7 +440,6 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
@@ -458,7 +455,6 @@ const styles = StyleSheet.create({
   modalInput: {
     borderWidth: 1,
     borderColor: '#cbd5f5',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
@@ -470,7 +466,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     backgroundColor: '#fee2e2',
-    borderRadius: 10,
   },
   modalDeleteText: {
     color: '#b91c1c',
@@ -482,7 +477,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     backgroundColor: '#e0f2fe',
-    borderRadius: 12,
   },
   modalAddText: {
     color: '#1d4ed8',
@@ -506,7 +500,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#1d4ed8',
-    borderRadius: 12,
   },
   modalSubmitText: {
     fontSize: 15,

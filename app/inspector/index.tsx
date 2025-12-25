@@ -398,7 +398,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -476,7 +475,6 @@ const styles = StyleSheet.create({
   statusButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#cbd5f5',
     backgroundColor: '#e2e8f0',
@@ -495,7 +493,6 @@ const styles = StyleSheet.create({
   },
   checkCard: {
     padding: 12,
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     backgroundColor: '#f8fafc',
@@ -514,7 +511,6 @@ const styles = StyleSheet.create({
   optionChip: {
     paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 10,
     backgroundColor: '#e2e8f0',
   },
   optionChipActive: {
@@ -535,7 +531,6 @@ const styles = StyleSheet.create({
   },
   photoItem: {
     width: 120,
-    borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -558,7 +553,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 10,
     backgroundColor: '#e0f2fe',
-    borderRadius: 12,
     alignItems: 'center',
   },
   photoAddText: {
@@ -568,7 +562,6 @@ const styles = StyleSheet.create({
   reportButton: {
     marginTop: 16,
     paddingVertical: 12,
-    borderRadius: 12,
     backgroundColor: '#1d4ed8',
     alignItems: 'center',
   },
@@ -587,7 +580,6 @@ const styles = StyleSheet.create({
     minHeight: 240,
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     padding: 12,
     fontSize: 14,
     textAlignVertical: 'top',
@@ -611,7 +603,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#22c55e',
-    borderRadius: 12,
   },
   reportSaveText: {
     fontSize: 15,

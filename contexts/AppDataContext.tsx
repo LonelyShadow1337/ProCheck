@@ -49,6 +49,7 @@ interface AppDataContextValue {
   createUser: (payload: Omit<User, 'id'>) => Promise<User>;
   deleteUser: (userId: string) => Promise<void>;
   updateUserProfile: (userId: string, profile: User['profile']) => Promise<void>;
+  updateUserPassword: (userId: string, newPassword: string) => Promise<void>;
 
   // Шаблоны
   createTemplate: (payload: Omit<Template, 'id' | 'updatedAt'>) => Promise<Template>;
@@ -74,6 +75,8 @@ interface AppDataContextValue {
     chatId: string,
     message: Omit<Chat['messages'][number], 'id' | 'createdAt'>
   ) => Promise<void>;
+  updateChatMessage: (messageId: string, newText: string) => Promise<void>;
+  deleteChatMessage: (messageId: string) => Promise<void>;
   deleteChat: (chatId: string, userId: string, scope: 'self' | 'all') => Promise<void>;
 
   // Запросы на создание аккаунта
@@ -258,6 +261,18 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
     [],
   );
 
+  // Обновление пароля пользователя
+  const updateUserPassword = useCallback(
+    async (userId: string, newPassword: string) => {
+      await dbService.updateUserPassword(userId, newPassword);
+      
+      // Обновляем данные
+      const loadedData = await loadAllData();
+      setData(loadedData);
+    },
+    [],
+  );
+
   // Создание шаблона
   const createTemplate = useCallback(
     async (payload: Omit<Template, 'id' | 'updatedAt'>) => {
@@ -404,6 +419,30 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
     [],
   );
 
+  // Обновление сообщения в чате
+  const updateChatMessage = useCallback(
+    async (messageId: string, newText: string) => {
+      await dbService.updateChatMessage(messageId, newText);
+      
+      // Обновляем данные
+      const loadedData = await loadAllData();
+      setData(loadedData);
+    },
+    [],
+  );
+
+  // Удаление сообщения из чата
+  const deleteChatMessage = useCallback(
+    async (messageId: string) => {
+      await dbService.deleteChatMessage(messageId);
+      
+      // Обновляем данные
+      const loadedData = await loadAllData();
+      setData(loadedData);
+    },
+    [],
+  );
+
   // Удаление чата: либо только для текущего пользователя, либо для всех участников
   const deleteChat = useCallback(
     async (chatId: string, userId: string, scope: 'self' | 'all') => {
@@ -512,6 +551,7 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createUser,
       deleteUser,
       updateUserProfile,
+      updateUserPassword,
       createTemplate,
       updateTemplate,
       deleteTemplate,
@@ -521,6 +561,8 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createReport,
       lockReport,
       addChatMessage,
+      updateChatMessage,
+      deleteChatMessage,
       deleteChat,
       createChat,
       createAccountRequest,
@@ -537,6 +579,7 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createUser,
       deleteUser,
       updateUserProfile,
+      updateUserPassword,
       createTemplate,
       updateTemplate,
       deleteTemplate,
@@ -546,6 +589,8 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createReport,
       lockReport,
       addChatMessage,
+      updateChatMessage,
+      deleteChatMessage,
       deleteChat,
       createChat,
       createAccountRequest,

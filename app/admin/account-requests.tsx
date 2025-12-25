@@ -4,9 +4,7 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -169,19 +167,16 @@ export default function AdminAccountRequestsScreen() {
         transparent
         onRequestClose={() => setSelectedRequest(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedRequest(null)}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.modalContainer}>
-            <Pressable style={styles.modalContainer} onPress={() => {}}>
-              <SafeAreaView style={styles.modalSafeArea}>
-                <ScreenHeader
-                  title="Детали запроса"
-                  onMenuPress={() => setSelectedRequest(null)}
-                />
-                <ScrollView
-                  style={styles.modalScroll}
-                  contentContainerStyle={styles.modalContent}
-                  keyboardShouldPersistTaps="handled">
+          <Pressable style={styles.sheetContainer} onPress={() => {}}>
+            <SafeAreaView style={styles.sheetSafeArea}>
+              <ScreenHeader
+                title="Детали запроса"
+                onMenuPress={() => setSelectedRequest(null)}
+              />
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalContent}
+                keyboardShouldPersistTaps="handled">
                 {selectedRequest && (
                   <>
                     <View style={styles.detailSection}>
@@ -258,10 +253,9 @@ export default function AdminAccountRequestsScreen() {
                     )}
                   </>
                 )}
-                </ScrollView>
-              </SafeAreaView>
-            </Pressable>
-          </KeyboardAvoidingView>
+              </ScrollView>
+            </SafeAreaView>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -328,13 +322,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
     justifyContent: 'flex-end',
   },
-  modalContainer: {
+  sheetContainer: {
     width: '100%',
     backgroundColor: 'transparent',
   },
-  modalSafeArea: {
-    flex: 1,
+  sheetSafeArea: {
     backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,

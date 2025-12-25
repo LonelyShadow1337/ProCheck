@@ -3,9 +3,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -32,10 +35,13 @@ export default function ChatDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const chatId = params.id;
-  const { data, auth, addChatMessage, refresh, deleteChat } = useAppData();
+  const { data, auth, addChatMessage, updateChatMessage, deleteChatMessage, refresh, deleteChat } = useAppData();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [messageText, setMessageText] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState<{ id: string; text: string } | null>(null);
+  const [editMessageText, setEditMessageText] = useState('');
+  const [messageMenuVisible, setMessageMenuVisible] = useState(false);
 
   const currentUser = data.users.find((user) => user.id === auth.currentUserId);
   const chat = data.chats.find((item) => item.id === chatId);
@@ -69,6 +75,42 @@ export default function ChatDetailsScreen() {
     if (!chat || !currentUser) return;
     await deleteChat(chat.id, currentUser.id, scope);
     router.replace('/chat');
+  };
+
+  const handleMessageLongPress = (message: { id: string; text: string; authorId: string }) => {
+    if (message.authorId === currentUser?.id) {
+      setSelectedMessage(message);
+      setEditMessageText(message.text);
+      setMessageMenuVisible(true);
+    }
+  };
+
+  const handleEditMessage = async () => {
+    if (!selectedMessage || !editMessageText.trim()) return;
+    await updateChatMessage(selectedMessage.id, editMessageText.trim());
+    setMessageMenuVisible(false);
+    setSelectedMessage(null);
+    setEditMessageText('');
+  };
+
+  const handleDeleteMessage = async () => {
+    if (!selectedMessage) return;
+    Alert.alert(
+      'Удалить сообщение?',
+      'Сообщение будет удалено для всех участников чата.',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteChatMessage(selectedMessage.id);
+            setMessageMenuVisible(false);
+            setSelectedMessage(null);
+          },
+        },
+      ]
+    );
   };
 
   const menuActions: MenuAction[] = [
@@ -110,7 +152,9 @@ export default function ChatDetailsScreen() {
             const isCurrent = item.authorId === currentUser?.id;
             const author = data.users.find((user) => user.id === item.authorId);
             return (
-              <View style={[styles.messageBubble, isCurrent ? styles.messageBubbleRight : styles.messageBubbleLeft]}>
+              <Pressable
+                onLongPress={() => handleMessageLongPress(item)}
+                style={[styles.messageBubble, isCurrent ? styles.messageBubbleRight : styles.messageBubbleLeft]}>
                 <Text style={[styles.messageAuthor, isCurrent && styles.messageAuthorSelf]}>
                   {author?.fullName ?? 'Участник'}
                 </Text>
@@ -118,7 +162,7 @@ export default function ChatDetailsScreen() {
                 <Text style={[styles.messageTime, isCurrent && styles.messageTimeSelf]}>
                   {new Date(item.createdAt).toLocaleString()}
                 </Text>
-              </View>
+              </Pressable>
             );
           }}
         />
@@ -137,6 +181,59 @@ export default function ChatDetailsScreen() {
       </KeyboardAvoidingView>
 
       <MenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} actions={menuActions} title="Действия" />
+
+      <Modal
+        visible={messageMenuVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => {
+          setMessageMenuVisible(false);
+          setSelectedMessage(null);
+        }}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            setMessageMenuVisible(false);
+            setSelectedMessage(null);
+          }}>
+          <Pressable style={styles.modalContainer} onPress={() => {}}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Редактировать сообщение</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editMessageText}
+                onChangeText={setEditMessageText}
+                multiline
+                placeholder="Введите текст сообщения"
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.deleteMessageButton}
+                  onPress={handleDeleteMessage}>
+                  <Text style={styles.deleteMessageButtonText}>Удалить</Text>
+                </TouchableOpacity>
+                <View style={styles.modalButtonsRow}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={() => {
+                      setMessageMenuVisible(false);
+                      setSelectedMessage(null);
+                    }}>
+                    <Text style={styles.cancelButtonText}>Отмена</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={handleEditMessage}>
+                    <Text style={styles.saveButtonText}>Сохранить</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -156,7 +253,6 @@ const styles = StyleSheet.create({
   messageBubble: {
     maxWidth: '85%',
     padding: 12,
-    borderRadius: 16,
     backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -211,7 +307,6 @@ const styles = StyleSheet.create({
     maxHeight: 100,
     borderWidth: 1,
     borderColor: '#cbd5f5',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
@@ -221,7 +316,75 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d4ed8',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: 'transparent',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    paddingBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2933',
+    marginBottom: 16,
+  },
+  editInput: {
+    borderWidth: 1,
+    borderColor: '#d9e2ec',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  modalActions: {
+    gap: 12,
+  },
+  deleteMessageButton: {
+    paddingVertical: 12,
+    backgroundColor: '#fee2e2',
+    alignItems: 'center',
+  },
+  deleteMessageButtonText: {
+    color: '#b91c1c',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  modalButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#e2e8f0',
+  },
+  cancelButtonText: {
+    color: '#1f2933',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#1d4ed8',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
   },
   sendButtonText: {
     color: '#ffffff',

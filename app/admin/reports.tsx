@@ -5,9 +5,7 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -131,35 +129,31 @@ export default function AdminReportsScreen() {
             setSelectedReport(null);
             setReportContent(null);
           }}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.modalContainer}>
-            <Pressable style={styles.modalContainer} onPress={() => {}}>
-              <SafeAreaView style={styles.modalSafeArea}>
-                <ScreenHeader
-                  title={reportContent?.title ?? 'Отчёт'}
-                  onMenuPress={() => {
-                    setSelectedReport(null);
-                    setReportContent(null);
-                  }}
-                />
-                <ScrollView
-                  style={styles.modalScroll}
-                  contentContainerStyle={styles.modalContent}
-                  keyboardShouldPersistTaps="handled">
+          <Pressable style={styles.sheetContainer} onPress={() => {}}>
+            <SafeAreaView style={styles.sheetSafeArea}>
+              <ScreenHeader
+                title={reportContent?.title ?? 'Отчёт'}
+                onMenuPress={() => {
+                  setSelectedReport(null);
+                  setReportContent(null);
+                }}
+              />
+              <ScrollView
+                style={styles.reportScroll}
+                contentContainerStyle={styles.reportContent}
+                keyboardShouldPersistTaps="handled">
                 <Text style={styles.reportText}>{reportContent?.text ?? ''}</Text>
-                </ScrollView>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => {
-                    setSelectedReport(null);
-                    setReportContent(null);
-                  }}>
-                  <Text style={styles.closeButtonText}>Закрыть</Text>
-                </TouchableOpacity>
-              </SafeAreaView>
-            </Pressable>
-          </KeyboardAvoidingView>
+              </ScrollView>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setSelectedReport(null);
+                  setReportContent(null);
+                }}>
+                <Text style={styles.closeButtonText}>Закрыть</Text>
+              </TouchableOpacity>
+            </SafeAreaView>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -225,13 +219,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
     justifyContent: 'flex-end',
   },
-  modalContainer: {
+  sheetContainer: {
     width: '100%',
     backgroundColor: 'transparent',
   },
-  modalSafeArea: {
-    flex: 1,
+  sheetSafeArea: {
     backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -240,12 +234,11 @@ const styles = StyleSheet.create({
     elevation: 14,
     maxHeight: '90%',
   },
-  modalScroll: {
+  reportScroll: {
     flex: 1,
-    minHeight: 200,
   },
-  modalContent: {
-    padding: 20,
+  reportContent: {
+    padding: 16,
   },
   reportText: {
     fontSize: 14,

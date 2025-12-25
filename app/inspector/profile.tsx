@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
+    KeyboardAvoidingView,
+    Platform,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -22,10 +24,14 @@ import { User } from '@/types/models';
 
 export default function InspectorProfileScreen() {
   const router = useRouter();
-  const { data, auth, updateUserProfile, refresh, logout } = useAppData();
+  const { data, auth, updateUserProfile, updateUserPassword, refresh, logout } = useAppData();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [editableProfile, setEditableProfile] = useState<User['profile']>({});
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const currentUser = data.users.find((user) => user.id === auth.currentUserId);
 
@@ -39,6 +45,32 @@ export default function InspectorProfileScreen() {
     if (!currentUser) return;
     await updateUserProfile(currentUser.id, editableProfile);
     Alert.alert('Профиль обновлён', 'Изменения успешно сохранены');
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentUser) return;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Ошибка', 'Заполните все поля');
+      return;
+    }
+    if (currentUser.password !== currentPassword) {
+      Alert.alert('Ошибка', 'Текущий пароль указан неверно');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Ошибка', 'Новые пароли не совпадают');
+      return;
+    }
+    if (newPassword.length < 4) {
+      Alert.alert('Ошибка', 'Пароль должен содержать минимум 4 символа');
+      return;
+    }
+    await updateUserPassword(currentUser.id, newPassword);
+    Alert.alert('Пароль изменён', 'Пароль успешно обновлён');
+    setPasswordModalVisible(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   const handleLogout = async () => {
@@ -73,10 +105,14 @@ export default function InspectorProfileScreen() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
       <ScreenHeader title="Профиль" subtitle={currentUser.fullName} onMenuPress={() => setMenuVisible(true)} />
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.content}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Общие сведения</Text>
           <Separator />
@@ -122,12 +158,76 @@ export default function InspectorProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Безопасность</Text>
+          <Separator />
+          <TouchableOpacity style={styles.passwordButton} onPress={() => setPasswordModalVisible(true)}>
+            <Text style={styles.passwordButtonText}>Изменить пароль</Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Выйти из аккаунта</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <MenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} actions={actions} title="Действия" />
+
+      <Modal
+        visible={passwordModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setPasswordModalVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setPasswordModalVisible(false)}>
+          <Pressable style={styles.modalContainer} onPress={() => {}}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Изменить пароль</Text>
+              <Text style={styles.label}>Текущий пароль</Text>
+              <TextInput
+                style={styles.input}
+                secureTextEntry
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                placeholder="Введите текущий пароль"
+              />
+              <Text style={styles.label}>Новый пароль</Text>
+              <TextInput
+                style={styles.input}
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Введите новый пароль"
+              />
+              <Text style={styles.label}>Подтвердите новый пароль</Text>
+              <TextInput
+                style={styles.input}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Повторите новый пароль"
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.modalCancel}
+                  onPress={() => {
+                    setPasswordModalVisible(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}>
+                  <Text style={styles.modalCancelText}>Отмена</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalSave} onPress={handleChangePassword}>
+                  <Text style={styles.modalSaveText}>Сохранить</Text>
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -147,7 +247,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -172,7 +271,6 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
@@ -182,7 +280,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#1d4ed8',
     paddingVertical: 12,
-    borderRadius: 12,
     alignItems: 'center',
   },
   saveText: {
@@ -193,7 +290,6 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#fee2e2',
     paddingVertical: 12,
-    borderRadius: 12,
     alignItems: 'center',
   },
   logoutText: {

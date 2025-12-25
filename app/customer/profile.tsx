@@ -4,6 +4,10 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -22,10 +26,14 @@ import { User } from '@/types/models';
 
 export default function CustomerProfileScreen() {
   const router = useRouter();
-  const { data, auth, updateUserProfile, refresh, logout } = useAppData();
+  const { data, auth, updateUserProfile, updateUserPassword, refresh, logout } = useAppData();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [editableProfile, setEditableProfile] = useState<User['profile']>({});
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const currentUser = data.users.find((user) => user.id === auth.currentUserId);
 
@@ -39,6 +47,32 @@ export default function CustomerProfileScreen() {
     if (!currentUser) return;
     await updateUserProfile(currentUser.id, editableProfile);
     Alert.alert('Профиль обновлён', 'Изменения успешно сохранены');
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentUser) return;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Ошибка', 'Заполните все поля');
+      return;
+    }
+    if (currentUser.password !== currentPassword) {
+      Alert.alert('Ошибка', 'Текущий пароль указан неверно');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Ошибка', 'Новые пароли не совпадают');
+      return;
+    }
+    if (newPassword.length < 4) {
+      Alert.alert('Ошибка', 'Пароль должен содержать минимум 4 символа');
+      return;
+    }
+    await updateUserPassword(currentUser.id, newPassword);
+    Alert.alert('Пароль изменён', 'Пароль успешно обновлён');
+    setPasswordModalVisible(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   const handleLogout = async () => {
@@ -73,10 +107,14 @@ export default function CustomerProfileScreen() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
       <ScreenHeader title="Профиль" subtitle={currentUser.fullName} onMenuPress={() => setMenuVisible(true)} />
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.content}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Основные данные</Text>
           <Separator />
@@ -124,7 +162,8 @@ export default function CustomerProfileScreen() {
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Выйти из аккаунта</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <MenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} actions={actions} title="Действия" />
     </SafeAreaView>
@@ -146,7 +185,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -171,7 +209,6 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
@@ -181,7 +218,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#1d4ed8',
     paddingVertical: 12,
-    borderRadius: 12,
     alignItems: 'center',
   },
   saveText: {
@@ -192,12 +228,22 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#fee2e2',
     paddingVertical: 12,
-    borderRadius: 12,
     alignItems: 'center',
   },
   logoutText: {
     color: '#b91c1c',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  passwordButton: {
+    marginTop: 12,
+    paddingVertical: 12,
+    backgroundColor: '#e0f2fe',
+    alignItems: 'center',
+  },
+  passwordButtonText: {
+    color: '#1d4ed8',
+    fontSize: 15,
     fontWeight: '600',
   },
   emptyState: {

@@ -3,16 +3,17 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -144,9 +145,15 @@ export default function LoginScreen() {
         animationType="slide"
         transparent
         onRequestClose={() => setRequestModalVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setRequestModalVisible(false)}>
-          <Pressable style={styles.modalContainer} onPress={() => {}}>
-            <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}>
+          <Pressable style={styles.modalOverlay} onPress={() => setRequestModalVisible(false)}>
+            <Pressable style={styles.modalContainer} onPress={() => {}}>
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalContent}
+                keyboardShouldPersistTaps="handled">
               <Text style={styles.modalTitle}>Заявка на создание аккаунта</Text>
               <Text style={styles.modalSubtitle}>Заполните форму для подачи заявки администратору</Text>
               
@@ -224,9 +231,10 @@ export default function LoginScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </ScrollView>
+              </ScrollView>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -259,7 +267,6 @@ const styles = StyleSheet.create({
   },
   form: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -278,7 +285,6 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
@@ -287,7 +293,6 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: Colors.light.tint,
     paddingVertical: 14,
-    borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
   },
@@ -302,7 +307,6 @@ const styles = StyleSheet.create({
   requestButton: {
     marginTop: 12,
     paddingVertical: 12,
-    borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.tint,
@@ -360,7 +364,6 @@ const styles = StyleSheet.create({
   roleButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#cbd5f5',
     backgroundColor: '#e2e8f0',
@@ -395,7 +398,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#1d4ed8',
-    borderRadius: 12,
   },
   modalSubmitText: {
     fontSize: 15,

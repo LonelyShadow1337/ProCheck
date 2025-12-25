@@ -135,6 +135,11 @@ export const updateUser = async (id: string, user: Partial<User>): Promise<void>
   }
 };
 
+export const updateUserPassword = async (id: string, newPassword: string): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('UPDATE users SET password = ? WHERE id = ?;', [newPassword, id]);
+};
+
 export const deleteUser = async (id: string): Promise<void> => {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM users WHERE id = ?;', [id]);
@@ -676,6 +681,16 @@ export const addChatMessage = async (
   );
 };
 
+export const updateChatMessage = async (messageId: string, newText: string): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('UPDATE messages SET text = ? WHERE id = ?;', [newText, messageId]);
+};
+
+export const deleteChatMessage = async (messageId: string): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM messages WHERE id = ?;', [messageId]);
+};
+
 export const deleteChat = async (chatId: string, userId: string, scope: 'self' | 'all'): Promise<void> => {
   const db = await getDatabase();
 
@@ -687,8 +702,7 @@ export const deleteChat = async (chatId: string, userId: string, scope: 'self' |
   } else {
     // Проверяем, не добавлен ли уже
     const existing = await db.getFirstAsync<any>(
-      'SELECT * FROM chat_deleted_for WHERE chatId = ? AND userId = ?;',
-      [chatId, userId]
+      `SELECT * FROM chat_deleted_for WHERE chatId = '${chatId}' AND userId = '${userId}';`
     );
     if (!existing) {
       await db.runAsync(

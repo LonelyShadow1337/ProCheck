@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
   chatCard: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 8,
@@ -199,7 +198,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d4ed8',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
   },
   newChatButtonText: {
     color: '#ffffff',

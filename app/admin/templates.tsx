@@ -3,9 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   FlatList,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -99,19 +97,16 @@ export default function AdminTemplatesScreen() {
         transparent
         onRequestClose={() => setSelectedTemplate(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedTemplate(null)}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.modalContainer}>
-            <Pressable style={styles.modalContainer} onPress={() => {}}>
-              <SafeAreaView style={styles.modalSafeArea}>
-                <ScreenHeader
-                  title={selectedTemplate?.title ?? 'Шаблон'}
-                  onMenuPress={() => setSelectedTemplate(null)}
-                />
-                <ScrollView
-                  style={styles.modalScroll}
-                  contentContainerStyle={styles.modalContent}
-                  keyboardShouldPersistTaps="handled">
+          <Pressable style={styles.sheetContainer} onPress={() => {}}>
+            <SafeAreaView style={styles.sheetSafeArea}>
+              <ScreenHeader
+                title={selectedTemplate?.title ?? 'Шаблон'}
+                onMenuPress={() => setSelectedTemplate(null)}
+              />
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalContent}
+                keyboardShouldPersistTaps="handled">
                 {selectedTemplate && (
                   <>
                     <View style={styles.detailSection}>
@@ -155,10 +150,9 @@ export default function AdminTemplatesScreen() {
                     </View>
                   </>
                 )}
-                </ScrollView>
-              </SafeAreaView>
-            </Pressable>
-          </KeyboardAvoidingView>
+              </ScrollView>
+            </SafeAreaView>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>

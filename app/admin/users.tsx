@@ -2,16 +2,19 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -200,9 +203,13 @@ export default function AdminUsersScreen() {
 
       <Modal visible={createModalVisible} animationType="slide" transparent>
         <Pressable style={styles.sheetOverlay} onPress={() => setCreateModalVisible(false)}>
-          <Pressable style={styles.sheetContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.sheetSafeArea}>
-            <Text style={styles.modalTitle}>Новый пользователь</Text>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.sheetContainer}>
+            <Pressable style={styles.sheetContainer} onPress={() => {}}>
+              <SafeAreaView style={styles.sheetSafeArea}>
+                <ScrollView keyboardShouldPersistTaps="handled">
+                  <Text style={styles.modalTitle}>Новый пользователь</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Логин"
@@ -249,8 +256,10 @@ export default function AdminUsersScreen() {
                 <Text style={styles.modalSubmitText}>Создать</Text>
               </TouchableOpacity>
             </View>
-            </SafeAreaView>
-          </Pressable>
+                </ScrollView>
+              </SafeAreaView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -304,7 +313,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: '#fee2e2',
-    borderRadius: 12,
   },
   deleteText: {
     color: '#b91c1c',
@@ -360,7 +368,6 @@ const styles = StyleSheet.create({
   modalInput: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
@@ -375,7 +382,6 @@ const styles = StyleSheet.create({
   roleButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,
-    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#cbd5f5',
     backgroundColor: '#e2e8f0',
@@ -409,7 +415,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#1d4ed8',
-    borderRadius: 12,
   },
   modalSubmitText: {
     fontSize: 15,

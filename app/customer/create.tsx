@@ -3,6 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import {
     Alert,
+    KeyboardAvoidingView,
+    Platform,
     RefreshControl,
     ScrollView,
     StyleSheet,
@@ -126,10 +128,14 @@ export default function CustomerCreateInspectionScreen() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safeArea}>
       <ScreenHeader title="Создать проверку" subtitle="Заполните данные и отправьте на утверждение" onMenuPress={() => setMenuVisible(true)} />
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.content}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Шаблоны</Text>
           <Separator />
@@ -238,7 +244,8 @@ export default function CustomerCreateInspectionScreen() {
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitText}>Создать проверку</Text>
         </TouchableOpacity>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <MenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} actions={actions} title="Действия" />
     </SafeAreaView>
@@ -260,7 +267,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -283,7 +289,6 @@ const styles = StyleSheet.create({
   templateChip: {
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#cbd5f5',
     backgroundColor: '#e2e8f0',
@@ -317,7 +322,6 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d9e2ec',
-    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
@@ -333,7 +337,6 @@ const styles = StyleSheet.create({
   checkItem: {
     marginTop: 12,
     padding: 12,
-    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     backgroundColor: '#f8fafc',
@@ -346,7 +349,6 @@ const styles = StyleSheet.create({
   checkInput: {
     borderWidth: 1,
     borderColor: '#cbd5f5',
-    borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 14,
@@ -358,7 +360,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     backgroundColor: '#fee2e2',
-    borderRadius: 10,
   },
   checkDeleteText: {
     color: '#b91c1c',
@@ -370,7 +371,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     backgroundColor: '#e0f2fe',
-    borderRadius: 12,
   },
   addItemText: {
     color: '#1d4ed8',
@@ -379,7 +379,6 @@ const styles = StyleSheet.create({
   submitButton: {
     backgroundColor: '#22c55e',
     paddingVertical: 14,
-    borderRadius: 14,
     alignItems: 'center',
     marginBottom: 16,
   },
