@@ -5,7 +5,9 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -134,13 +136,19 @@ export default function AdminInspectionsScreen() {
         transparent
         onRequestClose={() => setSelectedInspection(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedInspection(null)}>
-          <Pressable style={styles.modalContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.modalSafeArea}>
-              <ScreenHeader
-                title={selectedInspection?.title ?? 'Проверка'}
-                onMenuPress={() => setSelectedInspection(null)}
-              />
-              <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalContainer}>
+            <Pressable style={styles.modalContainer} onPress={() => {}}>
+              <SafeAreaView style={styles.modalSafeArea}>
+                <ScreenHeader
+                  title={selectedInspection?.title ?? 'Проверка'}
+                  onMenuPress={() => setSelectedInspection(null)}
+                />
+                <ScrollView
+                  style={styles.modalScroll}
+                  contentContainerStyle={styles.modalContent}
+                  keyboardShouldPersistTaps="handled">
                 {selectedInspection && (
                   <>
                     <View style={styles.detailSection}>
@@ -211,9 +219,10 @@ export default function AdminInspectionsScreen() {
                     )}
                   </>
                 )}
-              </ScrollView>
-            </SafeAreaView>
-          </Pressable>
+                </ScrollView>
+              </SafeAreaView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -246,7 +255,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -289,8 +297,6 @@ const styles = StyleSheet.create({
   modalSafeArea: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -324,7 +330,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#1d4ed8',
-    borderRadius: 12,
     alignItems: 'center',
   },
   reportButtonText: {

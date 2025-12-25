@@ -5,7 +5,9 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -129,28 +131,35 @@ export default function AdminReportsScreen() {
             setSelectedReport(null);
             setReportContent(null);
           }}>
-          <Pressable style={styles.modalContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.modalSafeArea}>
-              <ScreenHeader
-                title={reportContent?.title ?? 'Отчёт'}
-                onMenuPress={() => {
-                  setSelectedReport(null);
-                  setReportContent(null);
-                }}
-              />
-              <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalContainer}>
+            <Pressable style={styles.modalContainer} onPress={() => {}}>
+              <SafeAreaView style={styles.modalSafeArea}>
+                <ScreenHeader
+                  title={reportContent?.title ?? 'Отчёт'}
+                  onMenuPress={() => {
+                    setSelectedReport(null);
+                    setReportContent(null);
+                  }}
+                />
+                <ScrollView
+                  style={styles.modalScroll}
+                  contentContainerStyle={styles.modalContent}
+                  keyboardShouldPersistTaps="handled">
                 <Text style={styles.reportText}>{reportContent?.text ?? ''}</Text>
-              </ScrollView>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => {
-                  setSelectedReport(null);
-                  setReportContent(null);
-                }}>
-                <Text style={styles.closeButtonText}>Закрыть</Text>
-              </TouchableOpacity>
-            </SafeAreaView>
-          </Pressable>
+                </ScrollView>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setSelectedReport(null);
+                    setReportContent(null);
+                  }}>
+                  <Text style={styles.closeButtonText}>Закрыть</Text>
+                </TouchableOpacity>
+              </SafeAreaView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -168,7 +177,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -194,7 +202,6 @@ const styles = StyleSheet.create({
   badge: {
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
     backgroundColor: '#e0f2fe',
   },
   badgeLocked: {
@@ -225,8 +232,6 @@ const styles = StyleSheet.create({
   modalSafeArea: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,

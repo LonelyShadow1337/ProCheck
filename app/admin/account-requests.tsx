@@ -4,7 +4,9 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -167,13 +169,19 @@ export default function AdminAccountRequestsScreen() {
         transparent
         onRequestClose={() => setSelectedRequest(null)}>
         <Pressable style={styles.modalOverlay} onPress={() => setSelectedRequest(null)}>
-          <Pressable style={styles.modalContainer} onPress={() => {}}>
-            <SafeAreaView style={styles.modalSafeArea}>
-              <ScreenHeader
-                title="Детали запроса"
-                onMenuPress={() => setSelectedRequest(null)}
-              />
-              <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalContainer}>
+            <Pressable style={styles.modalContainer} onPress={() => {}}>
+              <SafeAreaView style={styles.modalSafeArea}>
+                <ScreenHeader
+                  title="Детали запроса"
+                  onMenuPress={() => setSelectedRequest(null)}
+                />
+                <ScrollView
+                  style={styles.modalScroll}
+                  contentContainerStyle={styles.modalContent}
+                  keyboardShouldPersistTaps="handled">
                 {selectedRequest && (
                   <>
                     <View style={styles.detailSection}>
@@ -250,9 +258,10 @@ export default function AdminAccountRequestsScreen() {
                     )}
                   </>
                 )}
-              </ScrollView>
-            </SafeAreaView>
-          </Pressable>
+                </ScrollView>
+              </SafeAreaView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -270,7 +279,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#ffffff',
     padding: 16,
-    borderRadius: 16,
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -296,7 +304,6 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
   },
   statusText: {
     fontSize: 12,
@@ -328,8 +335,6 @@ const styles = StyleSheet.create({
   modalSafeArea: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -371,7 +376,6 @@ const styles = StyleSheet.create({
   rejectButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
     backgroundColor: '#fee2e2',
     alignItems: 'center',
   },
@@ -383,7 +387,6 @@ const styles = StyleSheet.create({
   approveButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
     backgroundColor: '#1d4ed8',
     alignItems: 'center',
   },

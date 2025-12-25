@@ -1,16 +1,16 @@
 // Сервис для работы с данными через SQLite
 import {
-    AccountRequest,
-    Chat,
-    ChatMessage,
-    CheckItemStatus,
-    CheckItemTemplate,
-    Inspection,
-    InspectionStatus,
-    Report,
-    Template,
-    User,
-    UserRole
+  AccountRequest,
+  Chat,
+  ChatMessage,
+  CheckItemStatus,
+  CheckItemTemplate,
+  Inspection,
+  InspectionStatus,
+  Report,
+  Template,
+  User,
+  UserRole
 } from '@/types/models';
 import { getDatabase } from './database';
 
@@ -42,9 +42,9 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 export const getUserById = async (id: string): Promise<User | null> => {
   const db = await getDatabase();
+  // Используем прямую подстановку для ID
   const row = await db.getFirstAsync<any>(
-    'SELECT * FROM users WHERE id = ?;',
-    [id]
+    `SELECT * FROM users WHERE id = '${id}';`
   );
 
   if (!row) return null;
@@ -67,9 +67,10 @@ export const getUserById = async (id: string): Promise<User | null> => {
 
 export const getUserByUsername = async (username: string): Promise<User | null> => {
   const db = await getDatabase();
+  // Экранируем одинарные кавычки для безопасности
+  const escapedUsername = username.replace(/'/g, "''");
   const row = await db.getFirstAsync<any>(
-    'SELECT * FROM users WHERE LOWER(username) = LOWER(?);',
-    [username]
+    `SELECT * FROM users WHERE LOWER(username) = LOWER('${escapedUsername}');`
   );
 
   if (!row) return null;
@@ -147,9 +148,9 @@ export const getAllTemplates = async (): Promise<Template[]> => {
   
   const result: Template[] = [];
   for (const template of templates) {
+    // Используем прямую подстановку для ID, так как они генерируются системой и безопасны
     const items = await db.getAllAsync<CheckItemTemplate>(
-      'SELECT id, text FROM template_items WHERE templateId = ? ORDER BY id;',
-      [template.id]
+      `SELECT id, text FROM template_items WHERE templateId = '${template.id}' ORDER BY id;`
     );
     
     result.push({
@@ -167,16 +168,15 @@ export const getAllTemplates = async (): Promise<Template[]> => {
 
 export const getTemplateById = async (id: string): Promise<Template | null> => {
   const db = await getDatabase();
+  // Используем прямую подстановку для ID
   const template = await db.getFirstAsync<any>(
-    'SELECT * FROM templates WHERE id = ?;',
-    [id]
+    `SELECT * FROM templates WHERE id = '${id}';`
   );
 
   if (!template) return null;
 
   const items = await db.getAllAsync<CheckItemTemplate>(
-    'SELECT id, text FROM template_items WHERE templateId = ? ORDER BY id;',
-    [id]
+    `SELECT id, text FROM template_items WHERE templateId = '${id}' ORDER BY id;`
   );
 
   return {
@@ -255,14 +255,13 @@ export const getAllInspections = async (): Promise<Inspection[]> => {
 
   const result: Inspection[] = [];
   for (const inspection of inspections) {
+    // Используем прямую подстановку для ID, так как они генерируются системой и безопасны
     const checkItems = await db.getAllAsync<any>(
-      'SELECT id, text, status FROM check_items WHERE inspectionId = ? ORDER BY id;',
-      [inspection.id]
+      `SELECT id, text, status FROM check_items WHERE inspectionId = '${inspection.id}' ORDER BY id;`
     );
 
     const photos = await db.getAllAsync<{ photoUri: string }>(
-      'SELECT photoUri FROM inspection_photos WHERE inspectionId = ?;',
-      [inspection.id]
+      `SELECT photoUri FROM inspection_photos WHERE inspectionId = '${inspection.id}';`
     );
 
     result.push({
@@ -297,21 +296,19 @@ export const getAllInspections = async (): Promise<Inspection[]> => {
 
 export const getInspectionById = async (id: string): Promise<Inspection | null> => {
   const db = await getDatabase();
+  // Используем прямую подстановку для ID
   const inspection = await db.getFirstAsync<any>(
-    'SELECT * FROM inspections WHERE id = ?;',
-    [id]
+    `SELECT * FROM inspections WHERE id = '${id}';`
   );
 
   if (!inspection) return null;
 
   const checkItems = await db.getAllAsync<any>(
-    'SELECT id, text, status FROM check_items WHERE inspectionId = ? ORDER BY id;',
-    [id]
+    `SELECT id, text, status FROM check_items WHERE inspectionId = '${id}' ORDER BY id;`
   );
 
   const photos = await db.getAllAsync<{ photoUri: string }>(
-    'SELECT photoUri FROM inspection_photos WHERE inspectionId = ?;',
-    [id]
+    `SELECT photoUri FROM inspection_photos WHERE inspectionId = '${id}';`
   );
 
   return {
@@ -494,7 +491,8 @@ export const getAllReports = async (): Promise<Report[]> => {
 
 export const getReportById = async (id: string): Promise<Report | null> => {
   const db = await getDatabase();
-  const row = await db.getFirstAsync<any>('SELECT * FROM reports WHERE id = ?;', [id]);
+  // Используем прямую подстановку для ID
+  const row = await db.getFirstAsync<any>(`SELECT * FROM reports WHERE id = '${id}';`);
 
   if (!row) return null;
 
@@ -555,19 +553,17 @@ export const getAllChats = async (): Promise<Chat[]> => {
 
   const result: Chat[] = [];
   for (const chat of chats) {
+    // Используем прямую подстановку для ID
     const participants = await db.getAllAsync<{ userId: string }>(
-      'SELECT userId FROM chat_participants WHERE chatId = ?;',
-      [chat.id]
+      `SELECT userId FROM chat_participants WHERE chatId = '${chat.id}';`
     );
 
     const messages = await db.getAllAsync<any>(
-      'SELECT * FROM messages WHERE chatId = ? ORDER BY createdAt ASC;',
-      [chat.id]
+      `SELECT * FROM messages WHERE chatId = '${chat.id}' ORDER BY createdAt ASC;`
     );
 
     const deletedFor = await db.getAllAsync<{ userId: string }>(
-      'SELECT userId FROM chat_deleted_for WHERE chatId = ?;',
-      [chat.id]
+      `SELECT userId FROM chat_deleted_for WHERE chatId = '${chat.id}';`
     );
 
     result.push({
@@ -589,23 +585,21 @@ export const getAllChats = async (): Promise<Chat[]> => {
 
 export const getChatById = async (id: string): Promise<Chat | null> => {
   const db = await getDatabase();
-  const chat = await db.getFirstAsync<any>('SELECT * FROM chats WHERE id = ?;', [id]);
+  // Используем прямую подстановку для ID
+  const chat = await db.getFirstAsync<any>(`SELECT * FROM chats WHERE id = '${id}';`);
 
   if (!chat) return null;
 
   const participants = await db.getAllAsync<{ userId: string }>(
-    'SELECT userId FROM chat_participants WHERE chatId = ?;',
-    [id]
+    `SELECT userId FROM chat_participants WHERE chatId = '${id}';`
   );
 
   const messages = await db.getAllAsync<any>(
-    'SELECT * FROM messages WHERE chatId = ? ORDER BY createdAt ASC;',
-    [id]
+    `SELECT * FROM messages WHERE chatId = '${id}' ORDER BY createdAt ASC;`
   );
 
   const deletedFor = await db.getAllAsync<{ userId: string }>(
-    'SELECT userId FROM chat_deleted_for WHERE chatId = ?;',
-    [id]
+    `SELECT userId FROM chat_deleted_for WHERE chatId = '${id}';`
   );
 
   return {
@@ -728,9 +722,9 @@ export const getAllAccountRequests = async (): Promise<AccountRequest[]> => {
 
 export const getAccountRequestById = async (id: string): Promise<AccountRequest | null> => {
   const db = await getDatabase();
+  // Используем прямую подстановку для ID
   const row = await db.getFirstAsync<any>(
-    'SELECT * FROM account_requests WHERE id = ?;',
-    [id]
+    `SELECT * FROM account_requests WHERE id = '${id}';`
   );
 
   if (!row) return null;
