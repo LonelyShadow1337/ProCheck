@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
   sheetSafeArea: {
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,

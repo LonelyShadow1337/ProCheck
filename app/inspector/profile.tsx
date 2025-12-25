@@ -5,7 +5,9 @@ import React, { useEffect, useState } from 'react';
 import {
     Alert,
     KeyboardAvoidingView,
+    Modal,
     Platform,
+    Pressable,
     RefreshControl,
     ScrollView,
     StyleSheet,

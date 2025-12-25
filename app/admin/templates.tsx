@@ -140,13 +140,14 @@ export default function AdminTemplatesScreen() {
                     </View>
                     <Separator />
                     <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Пункты проверки ({selectedTemplate.items.length})</Text>
-                      {selectedTemplate.items.map((item, index) => (
-                        <View key={item.id} style={styles.itemCard}>
-                          <Text style={styles.itemNumber}>{index + 1}.</Text>
-                          <Text style={styles.itemText}>{item.text}</Text>
-                        </View>
-                      ))}
+                      <Text style={styles.sectionTitle}>Пункты проверки ({selectedTemplate.items.length})</Text>
+                      <View style={styles.detailItems}>
+                        {selectedTemplate.items.map((item) => (
+                          <View key={item.id} style={styles.detailItem}>
+                            <Text style={styles.detailItemText}>{item.text}</Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   </>
                 )}
@@ -210,9 +211,10 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: 'transparent',
   },
-  modalSafeArea: {
-    flex: 1,
+  sheetSafeArea: {
     backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -241,25 +243,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1f2933',
   },
-  itemCard: {
-    flexDirection: 'row',
-    padding: 12,
-    marginTop: 8,
-    backgroundColor: '#f8fafc',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  itemNumber: {
-    fontSize: 14,
+  sectionTitle: {
+    fontSize: 15,
     fontWeight: '600',
-    color: '#3b82f6',
-    marginRight: 8,
-    minWidth: 24,
+    color: '#1f2933',
+    marginBottom: 8,
   },
-  itemText: {
+  detailItems: {
+    marginTop: 12,
+    gap: 8,
+  },
+  detailItem: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#ffffff',
+  },
+  detailItemText: {
     fontSize: 14,
     color: '#1f2933',
-    flex: 1,
   },
 });
 

@@ -196,9 +196,17 @@ export default function AdminInspectionsScreen() {
                         {selectedInspection.status}
                       </Text>
                     </View>
+                    <Separator />
                     <View style={styles.detailSection}>
-                      <Text style={styles.detailLabel}>Пунктов проверки</Text>
-                      <Text style={styles.detailValue}>{selectedInspection.checkItems.length}</Text>
+                      <Text style={styles.sectionTitle}>Пункты проверки ({selectedInspection.checkItems.length})</Text>
+                      <View style={styles.checkItemsList}>
+                        {selectedInspection.checkItems.map((item) => (
+                          <View key={item.id} style={styles.checkItemCard}>
+                            <Text style={styles.checkItemText}>{item.text}</Text>
+                            <Text style={styles.checkItemStatus}>Статус: {item.status}</Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                     {selectedInspection.reportId && (
                       <View style={styles.detailSection}>
@@ -284,6 +292,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.4)',
     justifyContent: 'flex-end',
   },
+  sheetContainer: {
+    width: '100%',
+    backgroundColor: 'transparent',
+  },
+  sheetSafeArea: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -6 },
+    elevation: 14,
+    maxHeight: '90%',
+  },
   modalScroll: {
     flex: 1,
     minHeight: 200,
@@ -303,6 +327,31 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 15,
     color: '#1f2933',
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1f2933',
+    marginBottom: 8,
+  },
+  checkItemsList: {
+    marginTop: 12,
+    gap: 8,
+  },
+  checkItemCard: {
+    padding: 12,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  checkItemText: {
+    fontSize: 14,
+    color: '#1f2933',
+    marginBottom: 6,
+  },
+  checkItemStatus: {
+    fontSize: 13,
+    color: '#64748b',
   },
   reportButton: {
     marginTop: 8,

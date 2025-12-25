@@ -35,7 +35,7 @@ const statusTitles: Record<AccountRequest['status'], string> = {
 };
 
 export default function AdminAccountRequestsScreen() {
-  const { data, auth, refresh, approveAccountRequest, rejectAccountRequest } = useAppData();
+  const { data, auth, refresh, approveAccountRequest, rejectAccountRequest, deleteAccountRequest } = useAppData();
   const currentUser = data.users.find((user) => user.id === auth.currentUserId);
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -233,24 +233,53 @@ export default function AdminAccountRequestsScreen() {
                       </>
                     )}
 
-                    {selectedRequest.status === 'pending' && (
-                      <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                          style={[styles.rejectButton, processing && styles.disabled]}
-                          onPress={handleReject}
-                          disabled={processing}>
-                          <Text style={styles.rejectButtonText}>Отклонить</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.approveButton, processing && styles.disabled]}
-                          onPress={handleApprove}
-                          disabled={processing}>
-                          <Text style={styles.approveButtonText}>
-                            {processing ? 'Обработка...' : 'Одобрить'}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
+                    <View style={styles.actionButtons}>
+                      {selectedRequest.status === 'pending' && (
+                        <>
+                          <TouchableOpacity
+                            style={[styles.rejectButton, processing && styles.disabled]}
+                            onPress={handleReject}
+                            disabled={processing}>
+                            <Text style={styles.rejectButtonText}>Отклонить</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.approveButton, processing && styles.disabled]}
+                            onPress={handleApprove}
+                            disabled={processing}>
+                            <Text style={styles.approveButtonText}>
+                              {processing ? 'Обработка...' : 'Одобрить'}
+                            </Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={async () => {
+                          if (!selectedRequest) return;
+                          Alert.alert(
+                            'Удалить запрос?',
+                            'Запрос будет удалён из базы данных. Это действие нельзя отменить.',
+                            [
+                              { text: 'Отмена', style: 'cancel' },
+                              {
+                                text: 'Удалить',
+                                style: 'destructive',
+                                onPress: async () => {
+                                  try {
+                                    await deleteAccountRequest(selectedRequest.id);
+                                    setSelectedRequest(null);
+                                    Alert.alert('Запрос удалён', 'Запрос успешно удалён из базы данных');
+                                  } catch (error: any) {
+                                    Alert.alert('Ошибка', error.message || 'Не удалось удалить запрос');
+                                  }
+                                },
+                              },
+                            ]
+                          );
+                        }}>
+                        <Text style={styles.deleteButtonText}>Удалить запрос</Text>
+                      </TouchableOpacity>
+                    </View>
                   </>
                 )}
               </ScrollView>
@@ -329,6 +358,7 @@ const styles = StyleSheet.create({
   sheetSafeArea: {
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 24,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -386,6 +416,16 @@ const styles = StyleSheet.create({
   },
   approveButtonText: {
     color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    paddingVertical: 12,
+    backgroundColor: '#fee2e2',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#b91c1c',
     fontSize: 15,
     fontWeight: '600',
   },
