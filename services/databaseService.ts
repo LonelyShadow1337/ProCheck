@@ -813,9 +813,3 @@ export const updateAccountRequest = async (
   );
 };
 
-// Удаление запроса на создание аккаунта
-export const deleteAccountRequest = async (id: string): Promise<void> => {
-  const db = await getDatabase();
-  await db.runAsync('DELETE FROM account_requests WHERE id = ?;', [id]);
-};
-

@@ -17,8 +17,8 @@ import {
   UserRole
 } from '@/types/models';
 
-import * as dbService from '@/services/databaseService';
 import { getDatabase } from '@/services/database';
+import * as dbService from '@/services/databaseService';
 
 const AUTH_STORAGE_KEY = 'PROCHECK_AUTH_V1';
 
@@ -83,7 +83,6 @@ interface AppDataContextValue {
   createAccountRequest: (payload: Omit<AccountRequest, 'id' | 'requestedAt' | 'status'>) => Promise<AccountRequest>;
   approveAccountRequest: (requestId: string, adminId: string) => Promise<void>;
   rejectAccountRequest: (requestId: string, adminId: string) => Promise<void>;
-  deleteAccountRequest: (requestId: string) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | undefined>(undefined);
@@ -569,7 +568,6 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createAccountRequest,
       approveAccountRequest,
       rejectAccountRequest,
-      deleteAccountRequest,
     }),
     [
       data,
@@ -598,7 +596,6 @@ export const AppDataProvider: React.FC<React.PropsWithChildren> = ({ children })
       createAccountRequest,
       approveAccountRequest,
       rejectAccountRequest,
-      deleteAccountRequest,
     ],
   );
 
