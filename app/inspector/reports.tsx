@@ -1,16 +1,17 @@
 // Экран инспектора "Отчёты"
 import * as FileSystem from 'expo-file-system/legacy';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -25,7 +26,7 @@ export default function InspectorReportsScreen() {
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [openedReport, setOpenedReport] = useState<{ text: string; title: string } | null>(null);
+  const [openedReport, setOpenedReport] = useState<{ text: string; title: string; path: string } | null>(null);
 
   // Обновление данных
   const handleRefresh = async () => {
@@ -71,9 +72,23 @@ export default function InspectorReportsScreen() {
         return;
       }
       const text = await FileSystem.readAsStringAsync(path);
-      setOpenedReport({ text, title });
+      setOpenedReport({ text, title, path });
     } catch {
       Alert.alert('Ошибка', 'Не удалось открыть документ');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!openedReport) return;
+    try {
+      await Share.share({
+        title: openedReport.title,
+        message: openedReport.text,
+        url: openedReport.path,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Ошибка', 'Не удалось поделиться отчётом');
     }
   };
 
@@ -126,14 +141,19 @@ export default function InspectorReportsScreen() {
         <SafeAreaView style={styles.modalSafeArea}>
           <ScreenHeader
             title={openedReport?.title ?? 'Отчёт'}
-            onMenuPress={() => setOpenedReport(null)}
+            onBackPress={() => setOpenedReport(null)}
           />
           <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalContent}>
             <Text style={styles.reportText}>{openedReport?.text ?? ''}</Text>
           </ScrollView>
-          <TouchableOpacity style={styles.modalClose} onPress={() => setOpenedReport(null)}>
-            <Text style={styles.modalCloseText}>Закрыть</Text>
-          </TouchableOpacity>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+              <Text style={styles.shareButtonText}>Скачать и поделиться</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setOpenedReport(null)}>
+              <Text style={styles.modalCloseText}>Закрыть</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -203,6 +223,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#1d4ed8',
   },
   modalCloseText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  shareButton: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#1d4ed8',
+    alignItems: 'center',
+  },
+  shareButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

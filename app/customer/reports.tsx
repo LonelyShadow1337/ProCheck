@@ -1,18 +1,19 @@
 // Экран заказчика "Отчёты": просмотр отчётов по созданным проверкам
 
 import * as FileSystem from 'expo-file-system/legacy';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,7 +28,7 @@ export default function CustomerReportsScreen() {
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [openedReportContent, setOpenedReportContent] = useState<{ text: string; title: string } | null>(null);
+  const [openedReportContent, setOpenedReportContent] = useState<{ text: string; title: string; path: string } | null>(null);
 
   const myReports = useMemo(() => {
     if (!currentUser) return [];
@@ -53,9 +54,23 @@ export default function CustomerReportsScreen() {
         return;
       }
       const text = await FileSystem.readAsStringAsync(filePath);
-      setOpenedReportContent({ text, title });
+      setOpenedReportContent({ text, title, path: filePath });
     } catch {
       Alert.alert('Ошибка', 'Не удалось открыть отчёт');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!openedReportContent) return;
+    try {
+      await Share.share({
+        title: openedReportContent.title,
+        message: openedReportContent.text,
+        url: openedReportContent.path,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Ошибка', 'Не удалось поделиться отчётом');
     }
   };
 
@@ -111,13 +126,21 @@ export default function CustomerReportsScreen() {
         <Pressable style={styles.sheetOverlay} onPress={() => setOpenedReportContent(null)}>
           <Pressable style={styles.sheetContainer} onPress={() => {}}>
             <SafeAreaView style={styles.sheetSafeArea}>
-              <ScreenHeader title={openedReportContent?.title ?? 'Отчёт'} onMenuPress={() => setOpenedReportContent(null)} />
+              <ScreenHeader
+                title={openedReportContent?.title ?? 'Отчёт'}
+                onBackPress={() => setOpenedReportContent(null)}
+              />
               <ScrollView style={styles.reportScroll} contentContainerStyle={styles.reportContent}>
                 <Text style={styles.reportText}>{openedReportContent?.text ?? ''}</Text>
               </ScrollView>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setOpenedReportContent(null)}>
-                <Text style={styles.closeButtonText}>Закрыть</Text>
-              </TouchableOpacity>
+              <View style={styles.actionsRow}>
+                <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+                  <Text style={styles.shareButtonText}>Скачать и поделиться</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.closeButton} onPress={() => setOpenedReportContent(null)}>
+                  <Text style={styles.closeButtonText}>Закрыть</Text>
+                </TouchableOpacity>
+              </View>
             </SafeAreaView>
           </Pressable>
         </Pressable>
@@ -194,6 +217,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  shareButton: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#1d4ed8',
+    alignItems: 'center',
+  },
+  shareButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

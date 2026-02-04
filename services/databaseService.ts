@@ -1,16 +1,16 @@
 // Сервис для работы с данными через SQLite
 import {
-  AccountRequest,
-  Chat,
-  ChatMessage,
-  CheckItemStatus,
-  CheckItemTemplate,
-  Inspection,
-  InspectionStatus,
-  Report,
-  Template,
-  User,
-  UserRole
+    AccountRequest,
+    Chat,
+    ChatMessage,
+    CheckItemStatus,
+    CheckItemTemplate,
+    Inspection,
+    InspectionStatus,
+    Report,
+    Template,
+    User,
+    UserRole
 } from '@/types/models';
 import { getDatabase } from './database';
 
@@ -464,6 +464,22 @@ export const updateInspection = async (id: string, inspection: Partial<Inspectio
   }
 };
 
+export const deleteInspectionById = async (id: string): Promise<void> => {
+  const db = await getDatabase();
+  // Удаляем связанные фотографии и пункты проверки, затем саму проверку
+  try {
+    await db.runAsync('DELETE FROM inspection_photos WHERE inspectionId = ?;', [id]);
+  } catch {
+    // игнорируем, если таблицы или записи нет
+  }
+  try {
+    await db.runAsync('DELETE FROM check_items WHERE inspectionId = ?;', [id]);
+  } catch {
+    // игнорируем, если таблицы или записи нет
+  }
+  await db.runAsync('DELETE FROM inspections WHERE id = ?;', [id]);
+};
+
 export const updateCheckItemStatus = async (
   inspectionId: string,
   itemId: string,
@@ -543,6 +559,11 @@ export const createReport = async (report: Omit<Report, 'id' | 'createdAt' | 'lo
     createdAt,
     locked,
   };
+};
+
+export const deleteReportById = async (id: string): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM reports WHERE id = ?;', [id]);
 };
 
 export const lockReport = async (reportId: string): Promise<void> => {

@@ -1,18 +1,20 @@
 // Экран администратора "Отчёты": детальный список всех отчётов
 
 import * as FileSystem from 'expo-file-system/legacy';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Image,
+    Modal,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Share,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,13 +22,14 @@ import { MenuAction, MenuModal } from '@/components/ui/menu-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Separator } from '@/components/ui/separator';
 import { useAppData } from '@/contexts/AppDataContext';
+import * as DatabaseService from '@/services/databaseService';
 
 export default function AdminReportsScreen() {
   const { data, refresh } = useAppData();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [reportContent, setReportContent] = useState<{ text: string; title: string } | null>(null);
+  const [reportContent, setReportContent] = useState<{ text: string; title: string; path: string } | null>(null);
 
   const sortedReports = useMemo(() => {
    return [...data.reports].sort((a, b) => {
@@ -58,11 +61,52 @@ export default function AdminReportsScreen() {
         Alert.alert('Пустой отчёт', 'Файл существует, но не содержит данных');
         return;
       }
-      setReportContent({ text, title: inspection?.title ?? 'Отчёт' });
+      setReportContent({ text, title: inspection?.title ?? 'Отчёт', path: report.documentPath });
       setSelectedReport(reportId);
     } catch (err) {
       Alert.alert('Ошибка', 'Не удалось открыть документ');
     }
+  };
+
+  const handleShareReport = async () => {
+    if (!reportContent) return;
+    try {
+      await Share.share({
+        title: reportContent.title,
+        message: reportContent.text,
+        url: reportContent.path,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Ошибка', 'Не удалось поделиться отчётом');
+    }
+  };
+
+  const handleDeleteReport = () => {
+    if (!selectedReport || !reportContent) return;
+    Alert.alert(
+      'Удалить отчёт',
+      `Вы уверены, что хотите удалить отчёт "${reportContent.title}"? Это действие невозможно отменить.`,
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await DatabaseService.deleteReportById(selectedReport);
+              await refresh();
+              setSelectedReport(null);
+              setReportContent(null);
+              Alert.alert('Успешно', 'Отчёт удалён');
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Ошибка', 'Не удалось удалить отчёт');
+            }
+          },
+        },
+      ],
+    );
   };
 
   const actions: MenuAction[] = [
@@ -76,6 +120,16 @@ export default function AdminReportsScreen() {
         subtitle={`Всего: ${sortedReports.length}`}
         onMenuPress={() => setMenuVisible(true)}
       />
+      <View style={styles.filterRow}>
+        <Image
+          source={require('../../images/filter.png')}
+          style={styles.filterIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.filterText}>
+          Сортировка: по дате создания (новые сверху)
+        </Text>
+      </View>
       <FlatList
         data={sortedReports}
         keyExtractor={(report) => report.id}
@@ -137,7 +191,7 @@ export default function AdminReportsScreen() {
             <SafeAreaView style={styles.sheetSafeArea}>
               <ScreenHeader
                 title={reportContent?.title ?? 'Отчёт'}
-                onMenuPress={() => {
+                onBackPress={() => {
                   setSelectedReport(null);
                   setReportContent(null);
                 }}
@@ -148,14 +202,14 @@ export default function AdminReportsScreen() {
                 keyboardShouldPersistTaps="handled">
                 <Text style={styles.reportText}>{reportContent?.text ?? ''}</Text>
               </ScrollView>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => {
-                  setSelectedReport(null);
-                  setReportContent(null);
-                }}>
-                <Text style={styles.closeButtonText}>Закрыть</Text>
-              </TouchableOpacity>
+              <View style={styles.actionsRow}>
+                <TouchableOpacity style={styles.shareButton} onPress={handleShareReport}>
+                  <Text style={styles.shareButtonText}>Скачать и поделиться</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteReport}>
+                  <Text style={styles.deleteButtonText}>Удалить</Text>
+                </TouchableOpacity>
+              </View>
             </SafeAreaView>
           </Pressable>
         </Pressable>
@@ -171,6 +225,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#64748b',
+  },
+  filterText: {
+    fontSize: 13,
+    color: '#64748b',
+    flexShrink: 1,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -258,6 +330,34 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#ffffff',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 12,
+  },
+  shareButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#1d4ed8',
+    alignItems: 'center',
+  },
+  shareButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 12,
+    backgroundColor: '#fee2e2',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#b91c1c',
+    fontSize: 14,
     fontWeight: '600',
   },
 });

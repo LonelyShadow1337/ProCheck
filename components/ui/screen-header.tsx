@@ -1,23 +1,50 @@
-// Универсальный заголовок экрана с кнопкой меню (три вертикальные точки)
+// Универсальный заголовок экрана с кнопкой "назад" (иконка) и кнопкой меню (три вертикальные точки)
 
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ScreenHeaderProps {
   title: string;
   subtitle?: string;
+  /**
+   * Обработчик нажатия на кнопку "назад".
+   * Если не передан, кнопка не отображается.
+   */
+  onBackPress?: () => void;
+  /**
+   * Обработчик нажатия на меню (три точки).
+   * Если не передан, кнопка не отображается.
+   */
   onMenuPress?: () => void;
 }
 
-export const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, subtitle, onMenuPress }) => (
+export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
+  title,
+  subtitle,
+  onBackPress,
+  onMenuPress,
+}) => (
   <View style={styles.container}>
-    <View>
-      <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+    <View style={styles.leftSection}>
+      {onBackPress && (
+        <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
+          <Image
+            source={require('../../images/back.png')}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      )}
+      <View>
+        <Text style={styles.title}>{title}</Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      </View>
     </View>
-    <TouchableOpacity style={styles.menuButton} onPress={onMenuPress}>
-      <Text style={styles.menuText}>⋮</Text>
-    </TouchableOpacity>
+    {onMenuPress && (
+      <TouchableOpacity style={styles.menuButton} onPress={onMenuPress}>
+        <Text style={styles.menuText}>⋮</Text>
+      </TouchableOpacity>
+    )}
   </View>
 );
 
@@ -31,6 +58,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  leftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  backButton: {
+    padding: 8,
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
   },
   title: {
     fontSize: 22,

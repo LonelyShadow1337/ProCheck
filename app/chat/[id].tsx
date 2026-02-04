@@ -1,20 +1,20 @@
 // Экран переписки в конкретном чате
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -155,9 +155,27 @@ export default function ChatDetailsScreen() {
               <Pressable
                 onLongPress={() => handleMessageLongPress(item)}
                 style={[styles.messageBubble, isCurrent ? styles.messageBubbleRight : styles.messageBubbleLeft]}>
-                <Text style={[styles.messageAuthor, isCurrent && styles.messageAuthorSelf]}>
-                  {author?.fullName ?? 'Участник'}
-                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (author) {
+                      // Открываем профиль участника чата (только для просмотра)
+                      // Профиль редактировать нельзя
+                      Alert.alert(
+                        author.fullName,
+                        [
+                          `Роль: ${author.role}`,
+                          `Специализация: ${author.profile.specialization ?? 'Не указано'}`,
+                          `Рабочее время: ${author.profile.workHours ?? 'Не указано'}`,
+                          `Телефон: ${author.profile.phone ?? 'Не указано'}`,
+                          `E-mail: ${author.profile.email ?? 'Не указано'}`,
+                        ].join('\n'),
+                      );
+                    }
+                  }}>
+                  <Text style={[styles.messageAuthor, isCurrent && styles.messageAuthorSelf]}>
+                    {author?.fullName ?? 'Участник'}
+                  </Text>
+                </TouchableOpacity>
                 <Text style={[styles.messageText, isCurrent && styles.messageTextSelf]}>{item.text}</Text>
                 <Text style={[styles.messageTime, isCurrent && styles.messageTimeSelf]}>
                   {new Date(item.createdAt).toLocaleString()}

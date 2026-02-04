@@ -1,15 +1,16 @@
 // Экран администратора "Шаблоны": детальный список всех шаблонов проверок
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  FlatList,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    FlatList,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -48,6 +49,16 @@ export default function AdminTemplatesScreen() {
         subtitle={`Всего: ${sortedTemplates.length}`}
         onMenuPress={() => setMenuVisible(true)}
       />
+      <View style={styles.filterRow}>
+        <Image
+          source={require('../../images/filter.png')}
+          style={styles.filterIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.filterText}>
+          Сортировка: по дате обновления (новые сверху)
+        </Text>
+      </View>
       <FlatList
         data={sortedTemplates}
         keyExtractor={(template) => template.id}
@@ -169,6 +180,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#64748b',
+  },
+  filterText: {
+    fontSize: 13,
+    color: '#64748b',
+    flexShrink: 1,
   },
   card: {
     backgroundColor: '#ffffff',

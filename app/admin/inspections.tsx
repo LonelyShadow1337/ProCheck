@@ -1,17 +1,18 @@
 // Экран администратора "Проверки": детальный список всех проверок
 
 import * as FileSystem from 'expo-file-system/legacy';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,6 +20,7 @@ import { MenuAction, MenuModal } from '@/components/ui/menu-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Separator } from '@/components/ui/separator';
 import { useAppData } from '@/contexts/AppDataContext';
+import * as DatabaseService from '@/services/databaseService';
 import { Inspection } from '@/types/models';
 
 export default function AdminInspectionsScreen() {
@@ -42,6 +44,31 @@ export default function AdminInspectionsScreen() {
     setRefreshing(true);
     await refresh();
     setRefreshing(false);
+  };
+
+  const handleDeleteInspection = (inspection: Inspection) => {
+    Alert.alert(
+      'Удалить проверку',
+      `Вы уверены, что хотите удалить проверку "${inspection.title}"? Это действие невозможно отменить.`,
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await DatabaseService.deleteInspectionById(inspection.id);
+              await refresh();
+              setSelectedInspection(null);
+              Alert.alert('Успешно', 'Проверка удалена');
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Ошибка', 'Не удалось удалить проверку');
+            }
+          },
+        },
+      ],
+    );
   };
 
   const openReport = async (reportId: string, title: string) => {
@@ -79,6 +106,17 @@ export default function AdminInspectionsScreen() {
         subtitle={`Всего: ${filteredInspections.length}`}
         onMenuPress={() => setMenuVisible(true)}
       />
+      <View style={styles.filterRow}>
+        <Image
+          source={require('../../images/filter.png')}
+          style={styles.filterIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.filterText}>
+          Фильтр:{' '}
+          {filterStatus ? `Статус = "${filterStatus}"` : 'Все статусы'}; Сортировка: по дате создания (новые сверху)
+        </Text>
+      </View>
       <FlatList
         data={filteredInspections}
         keyExtractor={(inspection) => inspection.id}
@@ -219,6 +257,14 @@ export default function AdminInspectionsScreen() {
                       </TouchableOpacity>
                     </View>
                   )}
+                  <View style={styles.detailSection}>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => selectedInspection && handleDeleteInspection(selectedInspection)}
+                    >
+                      <Text style={styles.deleteButtonText}>Удалить эту проверку</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
             </ScrollView>
@@ -251,6 +297,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#64748b',
+  },
+  filterText: {
+    fontSize: 13,
+    color: '#64748b',
+    flexShrink: 1,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -354,6 +418,18 @@ const styles = StyleSheet.create({
   },
   reportButtonText: {
     color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#fee2e2',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#b91c1c',
     fontSize: 14,
     fontWeight: '600',
   },

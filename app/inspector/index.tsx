@@ -1,17 +1,24 @@
 // Экран инспектора "Назначенные": список назначенных проверок и управление ими
 import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity, TouchableWithoutFeedback, View
+    Alert,
+    FlatList,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -199,6 +206,16 @@ export default function InspectorAssignedScreen() {
         subtitle="Работайте с пунктами и формируйте отчёты"
         onMenuPress={() => setMenuVisible(true)}
       />
+      <View style={styles.filterRow}>
+        <Image
+          source={require('../../images/filter.png')}
+          style={styles.filterIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.filterText}>
+          Фильтр: {filter === 'all' ? 'Все проверки' : `Статус = "${filter}"`}; Сортировка: дата проверки ({sort === 'dateAsc' ? 'раньше → позже' : 'позже → раньше'})
+        </Text>
+      </View>
       <FlatList
         data={assignedInspections}
         keyExtractor={(inspection) => inspection.id}
@@ -394,6 +411,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#64748b',
+  },
+  filterText: {
+    fontSize: 13,
+    color: '#64748b',
+    flexShrink: 1,
   },
   card: {
     backgroundColor: '#ffffff',

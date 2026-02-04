@@ -1,7 +1,7 @@
 // Экран администратора "База данных": сводная информация по локальным данным
 
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,12 +9,44 @@ import { MenuAction, MenuModal } from '@/components/ui/menu-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Separator } from '@/components/ui/separator';
 import { useAppData } from '@/contexts/AppDataContext';
+import * as DatabaseService from '@/services/databaseService';
 
 export default function AdminDatabaseScreen() {
   const router = useRouter();
   const { data, refresh } = useAppData();
   const [menuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const handleDeleteAll = async (
+    dataType: string,
+    deleteFunction: () => Promise<void>
+  ) => {
+    Alert.alert(
+      `Удалить всё`,
+      `Вы уверены, что хотите удалить все ${dataType}? Это действие невозможно отменить.`,
+      [
+        {
+          text: 'Отмена',
+          onPress: () => {},
+          style: 'cancel',
+        },
+        {
+          text: 'Удалить',
+          onPress: async () => {
+            try {
+              await deleteFunction();
+              await refresh();
+              Alert.alert('Успешно', `Все ${dataType} удалены`);
+            } catch (error) {
+              Alert.alert('Ошибка', `Не удалось удалить ${dataType}`);
+              console.error(error);
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -33,10 +65,41 @@ export default function AdminDatabaseScreen() {
       label: 'Открыть чаты',
       onPress: () => router.push('/chat'),
     },
+    // Опасные операции по удалению данных вынесены в меню БД
     {
-      id: 'manage-db',
-      label: 'Управление БД',
-      onPress: () => router.push('/admin/database-management'),
+      id: 'delete-users',
+      label: 'Удалить всех пользователей',
+      onPress: () => handleDeleteAll('пользователей', DatabaseService.deleteAllUsers),
+    },
+    {
+      id: 'delete-inspections',
+      label: 'Удалить все проверки',
+      onPress: () => handleDeleteAll('проверки', DatabaseService.deleteAllInspections),
+    },
+    {
+      id: 'delete-reports',
+      label: 'Удалить все отчёты',
+      onPress: () => handleDeleteAll('отчёты', DatabaseService.deleteAllReports),
+    },
+    {
+      id: 'delete-chat-messages',
+      label: 'Удалить все сообщения чатов',
+      onPress: () => handleDeleteAll('сообщения чатов', DatabaseService.deleteAllChatMessages),
+    },
+    {
+      id: 'delete-chats',
+      label: 'Удалить все чаты',
+      onPress: () => handleDeleteAll('чаты', DatabaseService.deleteAllChats),
+    },
+    {
+      id: 'delete-templates',
+      label: 'Удалить все шаблоны',
+      onPress: () => handleDeleteAll('шаблоны', DatabaseService.deleteAllTemplates),
+    },
+    {
+      id: 'delete-requests',
+      label: 'Удалить все запросы на аккаунт',
+      onPress: () => handleDeleteAll('запросы на аккаунт', DatabaseService.deleteAllAccountRequests),
     },
   ];
 

@@ -1,17 +1,18 @@
 // Экран заказчика "Проверки": список созданных проверок с фильтрами и редактированием пунктов до утверждения
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Image,
+    Modal,
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,7 +20,7 @@ import { MenuAction, MenuModal } from '@/components/ui/menu-modal';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Separator } from '@/components/ui/separator';
 import { useAppData } from '@/contexts/AppDataContext';
-import { CheckItem, Inspection } from '@/types/models';
+import { CheckItem, Inspection, User } from '@/types/models';
 
 type SortVariant = 'dateAsc' | 'dateDesc';
 type FilterVariant = 'active' | 'all' | Inspection['status'];
@@ -45,6 +46,7 @@ export default function CustomerInspectionsScreen() {
   const [detailInspection, setDetailInspection] = useState<Inspection | null>(null);
   const [editModal, setEditModal] = useState<{ visible: boolean; inspection?: Inspection }>({ visible: false });
   const [editedItems, setEditedItems] = useState<CheckItem[]>([]);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<User | null>(null);
 
   const myInspections = useMemo(
     () =>
@@ -132,43 +134,73 @@ export default function CustomerInspectionsScreen() {
         subtitle={filter === 'all' ? 'Все созданные проверки' : `Фильтр: ${statusTitles[filter as Inspection['status']]}`}
         onMenuPress={() => setMenuVisible(true)}
       />
+      <View style={styles.filterRow}>
+        <Image
+          source={require('../../images/filter.png')}
+          style={styles.filterIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.filterText}>
+          Фильтр:{' '}
+          {filter === 'all'
+            ? 'Все проверки'
+            : filter === 'active'
+              ? 'Только активные'
+              : `Статус = "${statusTitles[filter as Inspection['status']]}"`}
+          ; Сортировка: дата проверки ({sort === 'dateAsc' ? 'раньше → позже' : 'позже → раньше'})
+        </Text>
+      </View>
       <FlatList
         data={filteredInspections}
         keyExtractor={(inspection) => inspection.id}
         contentContainerStyle={styles.listContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         ItemSeparatorComponent={Separator}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => setDetailInspection(item)}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardLine}>Тип: {item.type}</Text>
-            <Text style={styles.cardLine}>Предприятие: {item.enterprise.name}</Text>
-            <Text style={styles.cardLine}>Адрес: {item.enterprise.address}</Text>
-            <Text style={styles.cardLine}>Дата проверки: {new Date(item.planDate).toLocaleDateString()}</Text>
-            <Text style={styles.cardLine}>
-              Сдать отчёт до: {new Date(item.reportDueDate).toLocaleDateString()}
-            </Text>
-            <Text style={styles.status}>{statusTitles[item.status]}</Text>
-            <Separator />
-            <Text style={styles.sectionTitle}>Пункты проверки</Text>
-            {item.checkItems.map((checkItem) => (
-              <View key={checkItem.id} style={styles.checkItem}>
-                <Text style={styles.checkText}>{checkItem.text}</Text>
-                <Text style={styles.checkStatus}>{checkItem.status}</Text>
-              </View>
-            ))}
-            {(item.status === 'черновик' || item.status === 'ожидает утверждения') && (
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={(event) => {
-                  event.stopPropagation?.();
-                  openEditModal(item);
-                }}>
-                <Text style={styles.editButtonText}>Изменить пункты</Text>
-              </TouchableOpacity>
-            )}
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          const assignedInspector = data.users.find((u) => u.id === item.assignedInspectorId);
+          return (
+            <TouchableOpacity style={styles.card} onPress={() => setDetailInspection(item)}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardLine}>Тип: {item.type}</Text>
+              <Text style={styles.cardLine}>Предприятие: {item.enterprise.name}</Text>
+              <Text style={styles.cardLine}>Адрес: {item.enterprise.address}</Text>
+              {assignedInspector && (
+                <TouchableOpacity
+                  onPress={(event) => {
+                    event.stopPropagation?.();
+                    setSelectedUserProfile(assignedInspector);
+                  }}>
+                  <Text style={[styles.cardLine, styles.linkText]}>
+                    Назначенный инспектор: {assignedInspector.fullName}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <Text style={styles.cardLine}>Дата проверки: {new Date(item.planDate).toLocaleDateString()}</Text>
+              <Text style={styles.cardLine}>
+                Сдать отчёт до: {new Date(item.reportDueDate).toLocaleDateString()}
+              </Text>
+              <Text style={styles.status}>{statusTitles[item.status]}</Text>
+              <Separator />
+              <Text style={styles.sectionTitle}>Пункты проверки</Text>
+              {item.checkItems.map((checkItem) => (
+                <View key={checkItem.id} style={styles.checkItem}>
+                  <Text style={styles.checkText}>{checkItem.text}</Text>
+                  <Text style={styles.checkStatus}>{checkItem.status}</Text>
+                </View>
+              ))}
+              {(item.status === 'черновик' || item.status === 'ожидает утверждения') && (
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={(event) => {
+                    event.stopPropagation?.();
+                    openEditModal(item);
+                  }}>
+                  <Text style={styles.editButtonText}>Изменить пункты</Text>
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          );
+        }}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Вы ещё не создали ни одной проверки</Text>
@@ -199,6 +231,19 @@ export default function CustomerInspectionsScreen() {
                 Срок отчёта:{' '}
                 {detailInspection ? new Date(detailInspection.reportDueDate).toLocaleDateString() : ''}
               </Text>
+              {detailInspection?.assignedInspectorId && (
+                <TouchableOpacity
+                  onPress={() => {
+                    const inspector = data.users.find((u) => u.id === detailInspection.assignedInspectorId);
+                    if (inspector) setSelectedUserProfile(inspector);
+                  }}>
+                  <Text style={[styles.detailLine, styles.linkText]}>
+                    Назначенный инспектор:{' '}
+                    {data.users.find((u) => u.id === detailInspection.assignedInspectorId)?.fullName ??
+                      'Неизвестно'}
+                  </Text>
+                </TouchableOpacity>
+              )}
               <Text style={styles.detailStatus}>
                 Статус: {detailInspection ? statusTitles[detailInspection.status] : ''}
               </Text>
@@ -285,6 +330,39 @@ export default function CustomerInspectionsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <Modal
+        visible={!!selectedUserProfile}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setSelectedUserProfile(null)}>
+        <Pressable style={styles.sheetOverlay} onPress={() => setSelectedUserProfile(null)}>
+          <Pressable style={styles.sheetContainer} onPress={() => {}}>
+            <SafeAreaView style={styles.sheetSafeArea}>
+              <Text style={styles.modalTitle}>{selectedUserProfile?.fullName}</Text>
+              <Separator />
+              <Text style={styles.detailLine}>Роль: {selectedUserProfile?.role}</Text>
+              <Text style={styles.detailLine}>
+                Специализация: {selectedUserProfile?.profile.specialization ?? 'Не указано'}
+              </Text>
+              <Text style={styles.detailLine}>
+                Рабочее время: {selectedUserProfile?.profile.workHours ?? 'Не указано'}
+              </Text>
+              <Text style={styles.detailLine}>
+                Телефон: {selectedUserProfile?.profile.phone ?? 'Не указано'}
+              </Text>
+              <Text style={styles.detailLine}>
+                E-mail: {selectedUserProfile?.profile.email ?? 'Не указано'}
+              </Text>
+              <TouchableOpacity
+                style={[styles.editButton, { marginTop: 20 }]}
+                onPress={() => setSelectedUserProfile(null)}>
+                <Text style={styles.editButtonText}>Закрыть</Text>
+              </TouchableOpacity>
+            </SafeAreaView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -296,6 +374,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  filterIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#64748b',
+  },
+  filterText: {
+    fontSize: 13,
+    color: '#64748b',
+    flexShrink: 1,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -396,6 +492,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1d4ed8',
     marginTop: 12,
+  },
+  linkText: {
+    color: '#1d4ed8',
+    textDecorationLine: 'underline',
   },
   detailItem: {
     paddingVertical: 10,
