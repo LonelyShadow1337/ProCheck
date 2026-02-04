@@ -813,3 +813,60 @@ export const updateAccountRequest = async (
   );
 };
 
+// ============= ADMIN FUNCTIONS =============
+
+export const deleteAllUsers = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM users;');
+};
+
+export const deleteAllInspections = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM inspections;');
+};
+
+export const deleteAllReports = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM reports;');
+};
+
+export const deleteAllChats = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM chats;');
+};
+
+export const deleteAllChatMessages = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM chat_messages;');
+};
+
+export const deleteAllTemplates = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM templates;');
+};
+
+export const deleteAllCheckItemTemplates = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM check_item_templates;');
+};
+
+export const deleteAllAccountRequests = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM account_requests;');
+};
+
+export const clearDatabase = async (): Promise<void> => {
+  const db = await getDatabase();
+  // Удаляем все данные из всех таблиц в правильном порядке (учитывая foreign keys)
+  await db.runAsync('DELETE FROM chat_deleted_for;');
+  await db.runAsync('DELETE FROM chat_messages;');
+  await db.runAsync('DELETE FROM chats;');
+  await db.runAsync('DELETE FROM inspection_photos;');
+  await db.runAsync('DELETE FROM reports;');
+  await db.runAsync('DELETE FROM check_item_templates;');
+  await db.runAsync('DELETE FROM templates;');
+  await db.runAsync('DELETE FROM account_requests;');
+  await db.runAsync('DELETE FROM inspections;');
+  await db.runAsync('DELETE FROM users;');
+};
+

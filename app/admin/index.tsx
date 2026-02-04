@@ -33,6 +33,11 @@ export default function AdminDatabaseScreen() {
       label: 'Открыть чаты',
       onPress: () => router.push('/chat'),
     },
+    {
+      id: 'manage-db',
+      label: 'Управление БД',
+      onPress: () => router.push('/admin/database-management'),
+    },
   ];
 
   return (
@@ -110,6 +115,10 @@ export default function AdminDatabaseScreen() {
         <TouchableOpacity style={styles.chatButton} onPress={() => router.push('/chat')}>
           <Text style={styles.chatButtonText}>Перейти к чатам</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.managementButton} onPress={() => router.push('/admin/database-management')}>
+          <Text style={styles.managementButtonText}>Управление данными БД</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <MenuModal
@@ -174,6 +183,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chatButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  managementButton: {
+    backgroundColor: '#dc2626',
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  managementButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

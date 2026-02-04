@@ -36,6 +36,7 @@ export default function AdminProfileScreen() {
     phone: '',
     email: '',
   });
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -53,6 +54,7 @@ export default function AdminProfileScreen() {
     if (!currentUser) return;
     await updateUserProfile(currentUser.id, editableProfile);
     Alert.alert('Профиль обновлён', 'Изменения успешно сохранены');
+    setProfileModalVisible(false);
   };
 
   const handleChangePassword = async () => {
@@ -93,7 +95,6 @@ export default function AdminProfileScreen() {
   };
 
   const actions: MenuAction[] = [
-    { id: 'save', label: 'Сохранить профиль', onPress: handleSave },
     { id: 'chats', label: 'Открыть чаты', onPress: () => router.push('/chat') },
     { id: 'logout', label: 'Выйти из аккаунта', onPress: handleLogout },
   ];
@@ -128,44 +129,22 @@ export default function AdminProfileScreen() {
           <Text style={styles.label}>Логин</Text>
           <Text style={styles.value}>{currentUser.username}</Text>
           <Text style={styles.label}>Роль</Text>
-          <Text style={styles.value}>Администратор</Text>
+          <Text style={styles.value}>{currentUser.role === 'admin' ? 'Администратор' : currentUser.role === 'customer' ? 'Заказчик' : currentUser.role === 'inspector' ? 'Инспектор' : currentUser.role === 'seniorInspector' ? 'Старший инспектор' : currentUser.role}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Настройки профиля</Text>
+          <Text style={styles.cardTitle}>Профиль</Text>
           <Separator />
           <Text style={styles.label}>Специализация</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Опишите вашу специализацию"
-            value={editableProfile.specialization ?? ''}
-            onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, specialization: value }))}
-          />
+          <Text style={styles.value}>{currentUser.profile.specialization || '—'}</Text>
           <Text style={styles.label}>Рабочее время</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Например, 09:00 - 18:00"
-            value={editableProfile.workHours ?? ''}
-            onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, workHours: value }))}
-          />
+          <Text style={styles.value}>{currentUser.profile.workHours || '—'}</Text>
           <Text style={styles.label}>Телефон</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="+7 ..."
-            value={editableProfile.phone ?? ''}
-            onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, phone: value }))}
-          />
+          <Text style={styles.value}>{currentUser.profile.phone || '—'}</Text>
           <Text style={styles.label}>E-mail</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Почта для связи"
-            value={editableProfile.email ?? ''}
-            onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, email: value }))}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveText}>Сохранить изменения</Text>
+          <Text style={styles.value}>{currentUser.profile.email || '—'}</Text>
+          <TouchableOpacity style={styles.editButton} onPress={() => setProfileModalVisible(true)}>
+            <Text style={styles.editButtonText}>Редактировать профиль</Text>
           </TouchableOpacity>
         </View>
 
@@ -244,6 +223,69 @@ export default function AdminProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <Modal
+        visible={profileModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setProfileModalVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setProfileModalVisible(false)}>
+          <Pressable style={styles.modalContainer} onPress={() => {}}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalContent}>
+              <ScrollView keyboardShouldPersistTaps="handled">
+                <Text style={styles.modalTitle}>Редактировать профиль</Text>
+                <Text style={styles.label}>Специализация</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Опишите вашу специализацию"
+                  value={editableProfile.specialization ?? ''}
+                  onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, specialization: value }))}
+                />
+                <Text style={styles.label}>Рабочее время</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Например, 09:00 - 18:00"
+                  value={editableProfile.workHours ?? ''}
+                  onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, workHours: value }))}
+                />
+                <Text style={styles.label}>Телефон</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="+7 ..."
+                  value={editableProfile.phone ?? ''}
+                  onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, phone: value }))}
+                />
+                <Text style={styles.label}>E-mail</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Почта для связи"
+                  value={editableProfile.email ?? ''}
+                  onChangeText={(value) => setEditableProfile((prev) => ({ ...prev, email: value }))}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={styles.modalCancel}
+                    onPress={() => {
+                      setProfileModalVisible(false);
+                      if (currentUser) {
+                        setEditableProfile(currentUser.profile);
+                      }
+                    }}>
+                    <Text style={styles.modalCancelText}>Отмена</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.modalSave} onPress={handleSave}>
+                    <Text style={styles.modalSaveText}>Сохранить</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </KeyboardAvoidingView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -291,6 +333,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 15,
     marginTop: 4,
+  },
+  editButton: {
+    marginTop: 20,
+    backgroundColor: '#1d4ed8',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   saveButton: {
     marginTop: 20,
