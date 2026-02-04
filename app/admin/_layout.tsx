@@ -105,12 +105,6 @@ export default function AdminTabsLayout() {
           href: null, // Скрываем из табов, доступен через меню БД
         }}
       />
-      <Tabs.Screen
-        name="database-managment"
-        options={{
-          href: null, // Скрываем из табов, доступен через меню БД
-        }}
-      />
     </Tabs>
   );
 }
