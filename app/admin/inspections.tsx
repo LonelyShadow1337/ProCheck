@@ -3,16 +3,15 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useMemo, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -107,11 +106,6 @@ export default function AdminInspectionsScreen() {
         onMenuPress={() => setMenuVisible(true)}
       />
       <View style={styles.filterRow}>
-        <Image
-          source={require('../../images/filter.png')}
-          style={styles.filterIcon}
-          resizeMode="contain"
-        />
         <Text style={styles.filterText}>
           Фильтр:{' '}
           {filterStatus ? `Статус = "${filterStatus}"` : 'Все статусы'}; Сортировка: по дате создания (новые сверху)

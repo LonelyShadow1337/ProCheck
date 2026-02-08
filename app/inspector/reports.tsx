@@ -2,16 +2,16 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useMemo, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -28,42 +28,34 @@ export default function InspectorReportsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [openedReport, setOpenedReport] = useState<{ text: string; title: string; path: string } | null>(null);
 
-  // Обновление данных
   const handleRefresh = async () => {
     setRefreshing(true);
     await refresh();
     setRefreshing(false);
   };
 
-  // Действия меню
   const actions: MenuAction[] = [
     { id: 'refresh', label: 'Обновить', onPress: handleRefresh },
   ];
 
-  // Отчёты, доступные текущему пользователю
   const myReports = useMemo(() => {
     if (!currentUser) return [];
 
-    // Администратор видит все отчёты
     if (currentUser.role === 'admin') {
       return data.reports;
     }
 
-    // Инспектор видит отчёты, которые он создал (по createdBy)
     if (currentUser.role === 'inspector') {
       return data.reports.filter((report) => report.createdBy === currentUser.id);
     }
 
-    // Заказчик видит отчёты по своим проверкам (по customerId)
     if (currentUser.role === 'customer') {
       return data.reports.filter((report) => report.customerId === currentUser.id);
     }
 
-    // Старший инспектор не видит отчёты
     return [];
   }, [currentUser, data.reports]);
 
-  // Открытие отчёта
   const openReport = async (path: string, title: string) => {
     try {
       const info = await FileSystem.getInfoAsync(path);

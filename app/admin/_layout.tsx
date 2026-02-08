@@ -1,7 +1,6 @@
 // Таб-навигатор для роли администратора
 
 import { Tabs } from 'expo-router';
-import { Image } from 'react-native';
 
 const iconSize = 24;
 
@@ -17,68 +16,24 @@ export default function AdminTabsLayout() {
         name="index"
         options={{
           title: 'БД',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../../images/bd.png')}
-              style={{
-                width: iconSize,
-                height: iconSize,
-                tintColor: focused ? '#1d4ed8' : '#94a3b8',
-              }}
-              resizeMode="contain"
-            />
-          ),
         }}
       />
       <Tabs.Screen
         name="account-requests"
         options={{
           title: 'Запросы',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../../images/templates.png')}
-              style={{
-                width: iconSize,
-                height: iconSize,
-                tintColor: focused ? '#1d4ed8' : '#94a3b8',
-              }}
-              resizeMode="contain"
-            />
-          ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
           title: 'Чаты',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../../images/chat.png')}
-              style={{
-                width: iconSize,
-                height: iconSize,
-                tintColor: focused ? '#1d4ed8' : '#94a3b8',
-              }}
-              resizeMode="contain"
-            />
-          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Профиль',
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('../../images/profile.png')}
-              style={{
-                width: iconSize,
-                height: iconSize,
-                tintColor: focused ? '#1d4ed8' : '#94a3b8',
-              }}
-              resizeMode="contain"
-            />
-          ),
         }}
       />
       <Tabs.Screen

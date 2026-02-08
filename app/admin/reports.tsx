@@ -3,18 +3,17 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { useMemo, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -121,11 +120,6 @@ export default function AdminReportsScreen() {
         onMenuPress={() => setMenuVisible(true)}
       />
       <View style={styles.filterRow}>
-        <Image
-          source={require('../../images/filter.png')}
-          style={styles.filterIcon}
-          resizeMode="contain"
-        />
         <Text style={styles.filterText}>
           Сортировка: по дате создания (новые сверху)
         </Text>

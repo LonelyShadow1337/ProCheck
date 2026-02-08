@@ -3,22 +3,22 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as ImagePicker from 'expo-image-picker';
 import { useMemo, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -207,11 +207,6 @@ export default function InspectorAssignedScreen() {
         onMenuPress={() => setMenuVisible(true)}
       />
       <View style={styles.filterRow}>
-        <Image
-          source={require('../../images/filter.png')}
-          style={styles.filterIcon}
-          resizeMode="contain"
-        />
         <Text style={styles.filterText}>
           Фильтр: {filter === 'all' ? 'Все проверки' : `Статус = "${filter}"`}; Сортировка: дата проверки ({sort === 'dateAsc' ? 'раньше → позже' : 'позже → раньше'})
         </Text>

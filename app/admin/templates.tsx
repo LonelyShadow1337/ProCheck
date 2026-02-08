@@ -2,15 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import {
-    FlatList,
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -50,11 +49,6 @@ export default function AdminTemplatesScreen() {
         onMenuPress={() => setMenuVisible(true)}
       />
       <View style={styles.filterRow}>
-        <Image
-          source={require('../../images/filter.png')}
-          style={styles.filterIcon}
-          resizeMode="contain"
-        />
         <Text style={styles.filterText}>
           Сортировка: по дате обновления (новые сверху)
         </Text>

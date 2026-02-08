@@ -2,17 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Image,
-    Modal,
-    Pressable,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -135,11 +134,6 @@ export default function CustomerInspectionsScreen() {
         onMenuPress={() => setMenuVisible(true)}
       />
       <View style={styles.filterRow}>
-        <Image
-          source={require('../../images/filter.png')}
-          style={styles.filterIcon}
-          resizeMode="contain"
-        />
         <Text style={styles.filterText}>
           Фильтр:{' '}
           {filter === 'all'
